@@ -325,6 +325,10 @@ body.light .q-tag { color: var(--gold-dark); }
   text-align: right; cursor: pointer; transition: 0.15s;
 }
 .opt-btn.ltr { direction: ltr; text-align: left; }
+.q-input { width: 100%; box-sizing: border-box; background: var(--card-2); color: var(--text); border: 1.5px solid var(--border); border-radius: 14px; padding: 14px 16px; font-size: 1.05rem; font-family: inherit; outline: none; margin-top: 6px; }
+.q-input:focus { border-color: var(--gold); }
+.q-input.ok { border-color: var(--success); background: var(--success-bg); }
+.q-input.err { border-color: var(--danger); background: var(--danger-bg); }
 .opt-btn.selected { border-color: var(--gold); background: rgba(212, 175, 55, 0.14); }
 .opt-btn.ok { border-color: var(--success); background: var(--success-bg); color: var(--success); }
 .opt-btn.err { border-color: var(--danger); background: var(--danger-bg); color: var(--danger); }
@@ -820,20 +824,57 @@ const LEVEL_META = {
 const LEVEL_ORDER = ["A1", "A2", "B1", "B2"];
 const AVATARS = ["🎓", "👑", "🦁", "🚀", "💼", "🌟"];
 
+const PLACEMENT_PASS = { A1: 9, A2: 9, B1: 10, B2: 8 };
 const PLACEMENT_QUESTIONS = [
-  { lvl: "A1", tag: "مستوى A1 • أساسي", prompt: "اختر الترجمة الصحيحة لجملة: I wake up early every morning.", say: "I wake up early every morning.", options: ["أستيقظ مبكراً كل صباح.", "أنام متأخراً كل ليلة.", "أذهب للعمل بالقطار.", "أشرب الشاي في المساء."], answer: 0 },
-  { lvl: "A1", tag: "مستوى A1 • قواعد", prompt: "أكمل الجملة: She ___ English every day.", options: ["study", "studies", "studying", "studied to"], answer: 1, ltr: true },
-  { lvl: "A1", tag: "مستوى A1 • استماع", prompt: "استمع جيداً واختر معنى الجملة:", say: "How can I help you today?", options: ["أين تقع الغرفة؟", "متى يبدأ الاجتماع؟", "كيف يمكنني مساعدتك اليوم؟", "كم سعر هذه القهوة؟"], answer: 2 },
-  { lvl: "A2", tag: "مستوى A2 • عمل", prompt: "ما معنى كلمة (Available) في جملة: Are you available for a call?", say: "Are you available for a call?", options: ["متأخر", "متاح / متفرغ", "مشغول جداً", "موافق"], answer: 1 },
-  { lvl: "A2", tag: "مستوى A2 • طلب مهذب", prompt: "أكمل الطلب المهذب: ___ you send me the daily report, please?", options: ["Could", "Does", "Are", "Was"], answer: 0, ltr: true },
-  { lvl: "A2", tag: "مستوى A2 • استماع", prompt: "استمع واختر الترجمة الأدق:", say: "Leave your key at the reception desk.", options: ["أغلق الباب قبل النوم.", "اترك مفتاحك في مكتب الاستقبال.", "المصعد في الطابق الثالث.", "لدي حجز لليلتين."], answer: 1 },
-  { lvl: "B1", tag: "مستوى B1 • ربط الجمل", prompt: "اختر أداة الربط الصحيحة: ___ the shift was busy, the team finished on time.", options: ["Because", "Although", "Therefore", "Unless"], answer: 1, ltr: true },
-  { lvl: "B1", tag: "مستوى B1 • إشراف", prompt: "ما معنى الفعل (Inspect) في بيئة العمل؟", say: "Inspect", options: ["يلغي موعداً", "يؤجل العمل", "يفحص ويفتش بدقة", "يستبدل موظفاً"], answer: 2 },
-  { lvl: "B1", tag: "مستوى B1 • مواقف", prompt: "ما أفضل رد مهني على ضيف يشتكي من تأخر الخدمة؟", options: ["I apologize for the delay; I will solve it right away.", "Wait outside please, I am very busy.", "This is not my problem at all.", "Maybe tomorrow it will be fine."], answer: 0, ltr: true },
-  { lvl: "B2", tag: "مستوى B2 • طلاقة", prompt: "اختر أداة الربط المناسبة: He studied consistently; ___, he passed the B2 evaluation.", options: ["whereas", "consequently", "despite", "unless"], answer: 1, ltr: true },
-  { lvl: "B2", tag: "مستوى B2 • مفردات متقدمة", prompt: "ما معنى صفة (Meticulous) في: Housekeeping requires meticulous attention to detail.", say: "Meticulous", options: ["سريع وعشوائي", "مؤقت ومحدود", "شديد الدقة والاهتمام بالتفاصيل", "متردد وغير حاسم"], answer: 2 },
-  { lvl: "B2", tag: "مستوى B2 • تعبيرات احترافية", prompt: "ما معنى التعبير (On the same page) في الاجتماعات؟", say: "Let us stay on the same page.", options: ["قراءة نفس الكتاب فقط", "متفقون وعلى نفس الفهم", "التأخر عن الجدول الزمني", "نفاد المخزون تماماً"], answer: 1 }
+  // ---- A1 (12 نقطة، النجاح 9) ----
+  { lvl: "A1", tag: "A1 • ترجمة", prompt: "اختر الترجمة الصحيحة لجملة:", en: "I usually wake up at six o'clock.", say: "I usually wake up at six o'clock.", options: ["عادةً أستيقظ في الساعة السادسة.", "أنا أنتظر الساعة السادسة.", "استيقظت أمس في السادسة.", "سأستيقظ في السادسة غداً."], answer: 0 },
+  { lvl: "A1", tag: "A1 • قواعد", prompt: "اختر الإجابة الصحيحة:", en: "There ___ two chairs in the room.", options: ["is", "are", "be", "am"], answer: 1, ltr: true },
+  { lvl: "A1", tag: "A1 • اكتب الكلمة", type: "type", prompt: "اكتب كلمة واحدة تكمل الجملة:", en: "My brothers ___ at home now.", answers: ["are"] },
+  { lvl: "A1", tag: "A1 • استماع", prompt: "استمع جيداً واختر معنى الجملة:", say: "How can I help you today?", options: ["كيف يمكنني مساعدتك اليوم؟", "متى يبدأ الاجتماع؟", "أين تقع الغرفة؟", "كم الساعة الآن؟"], answer: 0 },
+  { lvl: "A1", tag: "A1 • اكتب الصيغة", type: "type", prompt: "اكتب الفعل بالصيغة الصحيحة:", en: "He (go) to work by bus every day.", answers: ["goes"] },
+  { lvl: "A1", tag: "A1 • قواعد", prompt: "أكمل الجملة:", en: "She ___ English every day.", options: ["study", "studies", "studying", "studied to"], answer: 1, ltr: true },
+  { lvl: "A1", tag: "A1 • ترجمة بالكتابة", type: "type", typo: true, prompt: "اكتب بالإنجليزية: أين المطبخ؟", answers: ["where is the kitchen", "where's the kitchen"] },
+  { lvl: "A1", tag: "A1 • ترجمة بالكتابة", type: "type", typo: true, prompt: "اكتب بالإنجليزية: أنا أحب القهوة.", answers: ["i like coffee", "i love coffee"] },
+  // ---- A2 (12 نقطة، النجاح 9) ----
+  { lvl: "A2", tag: "A2 • طلب مهذب", prompt: "أكمل الطلب المهذب:", en: "___ you send me the daily report, please?", options: ["Could", "Does", "Are", "Was"], answer: 0, ltr: true },
+  { lvl: "A2", tag: "A2 • الماضي", prompt: "اختر الإجابة الصحيحة:", en: "Yesterday we ___ the shipment at noon.", options: ["receive", "received", "receiving", "have receive"], answer: 1, ltr: true },
+  { lvl: "A2", tag: "A2 • اكتب الكلمة", type: "type", prompt: "اكتب كلمة واحدة تكمل الجملة:", en: "I have lived here ___ 2019.", answers: ["since"] },
+  { lvl: "A2", tag: "A2 • استماع", prompt: "استمع واختر الترجمة الأدق:", say: "Leave your key at the reception desk.", options: ["اترك مفتاحك في مكتب الاستقبال.", "أغلق الباب قبل النوم.", "خذ المفتاح من الغرفة.", "اطلب مفتاحاً جديداً من المدير."], answer: 0 },
+  { lvl: "A2", tag: "A2 • مفردات", prompt: "ما معنى كلمة (Available) في الجملة:", en: "Are you available for a call?", say: "Are you available for a call?", options: ["متأخر", "متاح / متفرغ", "مشغول جداً", "موافق"], answer: 1 },
+  { lvl: "A2", tag: "A2 • اكتب الكلمة", type: "type", prompt: "اكتب كلمة واحدة تكمل الجملة:", en: "There isn't ___ milk in the fridge.", answers: ["any"] },
+  { lvl: "A2", tag: "A2 • ترجمة بالكتابة", type: "type", typo: true, prompt: "اكتب بالإنجليزية: هل يمكنني الدفع بالبطاقة؟", answers: ["can i pay by card", "can i pay with card", "can i pay with a card", "can i pay by credit card", "can i pay with the card", "can i pay by a card", "may i pay by card", "may i pay with a card", "can i pay by debit card", "can i pay with my card"] },
+  { lvl: "A2", tag: "A2 • ترجمة بالكتابة", type: "type", typo: true, prompt: "اكتب بالإنجليزية: سأتصل بك غداً.", answers: ["i will call you tomorrow", "i'll call you tomorrow", "i am going to call you tomorrow", "i'm going to call you tomorrow", "i will phone you tomorrow", "i'll phone you tomorrow", "i will ring you tomorrow", "i'll ring you tomorrow"] },
+  // ---- B1 (12 نقطة، النجاح 10) ----
+  { lvl: "B1", tag: "B1 • ربط الجمل", prompt: "اختر أداة الربط الصحيحة:", en: "___ the shift was busy, the team finished on time.", options: ["Because", "Although", "Therefore", "Unless"], answer: 1, ltr: true },
+  { lvl: "B1", tag: "B1 • الشرط", prompt: "اختر الإجابة الصحيحة:", en: "If I ___ more time, I would learn another language.", options: ["have", "had", "will have", "would have"], answer: 1, ltr: true },
+  { lvl: "B1", tag: "B1 • استماع", prompt: "استمع واختر المعنى الأدق:", say: "I'd rather take the earlier flight if it's not too expensive.", options: ["أفضّل الرحلة الأبكر إن لم تكن غالية جداً.", "سألغي الرحلة لأنها غالية.", "الرحلة الأبكر ممتلئة بالفعل.", "كنت أتمنى لو حجزت رحلة أرخص."], answer: 0 },
+  { lvl: "B1", tag: "B1 • اكتب الصيغة", type: "type", prompt: "اكتب الفعل بالصيغة الصحيحة:", en: "She asked me where I (come) from.", answers: ["came"] },
+  { lvl: "B1", tag: "B1 • مفردات", prompt: "اختر أقرب معنى:", en: "The manager postponed the meeting.", options: ["أجّل الاجتماع", "ألغى الاجتماع نهائياً", "ترأّس الاجتماع", "بدأ الاجتماع مبكراً"], answer: 0 },
+  { lvl: "B1", tag: "B1 • اكتب الكلمة", type: "type", prompt: "اكتب كلمة واحدة تكمل الجملة:", en: "I have been waiting here ___ two hours.", answers: ["for"] },
+  { lvl: "B1", tag: "B1 • ترجمة بالكتابة", type: "type", typo: true, prompt: "اكتب بالإنجليزية: لم أنهِ المهمة بعد.", answers: ["i haven't finished the task yet", "i have not finished the task yet", "i haven't finished the job yet", "i have not finished the job yet", "i haven't finished the work yet", "i have not finished the work yet", "i haven't completed the task yet", "i have not completed the task yet", "i still haven't finished the task", "i still have not finished the task", "i haven't finished it yet", "i have not finished it yet"] },
+  { lvl: "B1", tag: "B1 • ترجمة بالكتابة", type: "type", typo: true, prompt: "اكتب بالإنجليزية: لو كنت مكانك لقبلت العرض.", answers: ["if i were you i would accept the offer", "if i were you i'd accept the offer", "if i were you i would take the offer", "if i were you i'd take the offer", "if i was you i would accept the offer", "if i was you i'd accept the offer", "if i were in your place i would accept the offer", "if i were in your position i would accept the offer"] },
+  // ---- B2 (10 نقاط، النجاح 8) ----
+  { lvl: "B2", tag: "B2 • تراكيب متقدمة", prompt: "اختر الإجابة الصحيحة:", en: "Not only ___ late, but he also forgot the documents.", options: ["he was", "was he", "he is", "is he was"], answer: 1, ltr: true },
+  { lvl: "B2", tag: "B2 • المستقبل التام", prompt: "اختر الإجابة الصحيحة:", en: "By next June, she ___ here for ten years.", options: ["will work", "will have worked", "has worked", "would work"], answer: 1, ltr: true },
+  { lvl: "B2", tag: "B2 • اكتب الصيغة", type: "type", prompt: "اكتب الفعل بالصيغة الصحيحة (كلمتان):", en: "I wish I (know) the answer yesterday.", answers: ["had known"] },
+  { lvl: "B2", tag: "B2 • اكتب الكلمة", type: "type", prompt: "اكتب حرف الجر المناسب:", en: "He insisted ___ paying for dinner.", answers: ["on"] },
+  { lvl: "B2", tag: "B2 • ترجمة بالكتابة", type: "type", typo: true, prompt: "اكتب بالإنجليزية: كان من المفترض أن نصل أمس.", answers: ["we were supposed to arrive yesterday", "we were supposed to get here yesterday", "we were supposed to arrive here yesterday", "we should have arrived yesterday", "we should have gotten here yesterday", "we should have got here yesterday", "we were due to arrive yesterday", "we were meant to arrive yesterday"] },
+  { lvl: "B2", tag: "B2 • ترجمة بالكتابة", type: "type", typo: true, prompt: "اكتب بالإنجليزية: كان يجب أن أتصل بك أمس.", answers: ["i should have called you yesterday", "i should have phoned you yesterday", "i should have rung you yesterday", "i should have contacted you yesterday", "i should have called you yesterday"] },
 ];
+function placementPts(q) { return q.pts || (q.type === "type" ? 2 : 1); }
+function placementNorm(s) { return String(s || "").toLowerCase().replace(/[\u2018\u2019`\u00b4]/g, "'").replace(/[^a-z0-9'\s]/g, " ").replace(/\s+/g, " ").trim(); }
+function placementLev1(a, b) {
+  if (a === b) return true;
+  if (Math.abs(a.length - b.length) > 1) return false;
+  let i = 0; while (i < a.length && i < b.length && a[i] === b[i]) i++;
+  if (a.length === b.length) return a.slice(i + 1) === b.slice(i + 1);
+  return a.length > b.length ? a.slice(i + 1) === b.slice(i) : a.slice(i) === b.slice(i + 1);
+}
+function gradeTyped(q, val) {
+  const v = placementNorm(val);
+  if (!v) return false;
+  return q.answers.some(a => { const n = placementNorm(a); return v === n || (q.typo && n.length >= 8 && placementLev1(v, n)); });
+}
 
 const ROLEPLAYS = [
   { id: "cafe", title: "☕ الكافيه", steps: [
@@ -1187,6 +1228,7 @@ function startPlacementTest() {
     mode: "placement",
     title: "🎯 اختبار تحديد المستوى (Speakora)",
     passPct: 0, xpReward: 50,
+    lvlGot: {}, lvlAns: {}, failStreak: 0, missed: [], stoppedEarly: false, skip: false,
     questions: PLACEMENT_QUESTIONS.map(q => Object.assign({ type: "choice" }, q))
   });
 }
@@ -1522,7 +1564,7 @@ function renderQuizQuestion() {
   const q = quizCtx.questions[quizCtx.idx];
   quizCtx.state = "answering"; quizCtx.selected = null; quizCtx.built = []; quizCtx.matchSel = null; quizCtx.matchDone = [];
   document.getElementById("ov-title").innerText = quizCtx.title;
-  document.getElementById("ov-counter").innerText = `${quizCtx.idx + 1} / ${quizCtx.questions.length}`;
+  document.getElementById("ov-counter").innerText = `${quizCtx.idx + 1} / ${quizCtx.questions.length}`; document.getElementById("ov-counter").style.direction = "ltr";
   document.getElementById("ov-bar").style.width = (quizCtx.idx / quizCtx.questions.length * 100) + "%";
   const fb = document.getElementById("ov-fb"); fb.className = "fb-box"; fb.innerText = "";
   const act = document.getElementById("ov-action"); act.innerText = "تحقق من الإجابة"; act.disabled = true; act.onclick = handleQuizAction;
@@ -1532,7 +1574,7 @@ function renderQuizQuestion() {
     body.innerHTML = `
       <span class="q-tag">${q.tag || "اختر الإجابة الصحيحة"}</span>
       ${q.showWord ? `<div class="study-card" style="padding:16px; margin-bottom:13px;"><div class="study-word" style="font-size:1.55rem;">${q.prompt}</div><button class="btn-outline" style="width:auto; padding:6px 14px;" id="q-say">🔊 استمع</button></div>`
-      : `<div class="q-title">${q.prompt}</div>${q.say ? `<button class="btn-outline" style="margin-bottom:13px;" id="q-say">🔊 استمع للجملة</button>` : ""}`}
+      : `<div class="q-title">${q.prompt}</div>${q.en ? `<div class="q-title" dir="ltr" style="text-align:left;">${q.en}</div>` : ""}${q.say ? `<button class="btn-outline" style="margin-bottom:13px;" id="q-say">🔊 استمع للجملة</button>` : ""}`}
       <div class="opt-list" id="q-opts"></div>
     `;
     if (q.say) { document.getElementById("q-say").onclick = () => speak(q.say); if (!q.showWord) speak(q.say); }
@@ -1548,6 +1590,12 @@ function renderQuizQuestion() {
       };
       list.appendChild(b);
     });
+  } else if (q.type === "type") {
+    body.innerHTML = `<span class="q-tag">${q.tag || "✍️ اكتب الإجابة"}</span><div class="q-title">${q.prompt}</div>${q.en ? `<div class="q-title" dir="ltr" style="text-align:left;">${q.en}</div>` : ""}<input id="q-inp" class="q-input" type="text" dir="ltr" lang="en" autocomplete="off" autocapitalize="off" autocorrect="off" spellcheck="false" placeholder="اكتب إجابتك هنا">`;
+    const inp = document.getElementById("q-inp");
+    inp.oninput = () => { act.disabled = !inp.value.trim(); };
+    inp.onkeydown = ev => { if (ev.key === "Enter" && !act.disabled) { ev.preventDefault(); act.click(); } };
+    setTimeout(() => { try { inp.focus(); } catch (e) {} }, 60);
   } else if (q.type === "build") {
     body.innerHTML = `<span class="q-tag">🧩 رتب الكلمات لتكوين الجملة</span><div class="q-title">${q.ar}</div><div class="drop-zone" id="q-drop"></div><div class="word-bank" id="q-bank"></div>`;
     renderBuildUI(q);
@@ -1562,6 +1610,12 @@ function renderQuizQuestion() {
       const b = document.createElement("button"); b.className = "opt-btn"; b.innerText = item.txt;
       b.onclick = () => selectMatch("ar", item.id, b, q); arCol.appendChild(b);
     });
+  }
+  if (quizCtx.mode === "placement") {
+    const sk = document.createElement("button"); sk.className = "btn-outline"; sk.id = "q-skip";
+    sk.style.cssText = "margin-top:14px; width:auto; padding:7px 16px;"; sk.innerText = "مش عارف 🤷";
+    sk.onclick = () => { if (quizCtx.state !== "answering") return; quizCtx.skip = true; handleQuizAction(); };
+    body.appendChild(sk);
   }
 }
 
@@ -1601,24 +1655,45 @@ function renderBuildUI(q) {
   document.getElementById("ov-action").disabled = quizCtx.built.length === 0;
 }
 
+function placementBoundaryStop() {
+  const prev = quizCtx.questions[quizCtx.idx - 1], nxt = quizCtx.questions[quizCtx.idx];
+  if (!prev || !nxt || prev.lvl === nxt.lvl) return false;
+  const passed = (quizCtx.lvlGot[prev.lvl] || 0) >= PLACEMENT_PASS[prev.lvl];
+  quizCtx.failStreak = passed ? 0 : (quizCtx.failStreak || 0) + 1;
+  return quizCtx.failStreak >= 2;
+}
+
 function handleQuizAction() {
   const q = quizCtx.questions[quizCtx.idx], fb = document.getElementById("ov-fb"), act = document.getElementById("ov-action");
   if (quizCtx.state === "next") {
     quizCtx.idx++;
-    if (quizCtx.idx >= quizCtx.questions.length) finishQuiz(); else renderQuizQuestion();
+    if (quizCtx.idx >= quizCtx.questions.length) finishQuiz();
+    else if (quizCtx.mode === "placement" && placementBoundaryStop()) { quizCtx.stoppedEarly = true; finishQuiz(); }
+    else renderQuizQuestion();
     return;
   }
-  let ok = false, rightTxt = "";
+  const skipped = !!quizCtx.skip; quizCtx.skip = false;
+  let ok = false, rightTxt = "", typedVal = "";
   if (q.type === "choice") {
-    ok = quizCtx.selected === q.answer; rightTxt = q.options[q.answer];
+    ok = !skipped && quizCtx.selected === q.answer; rightTxt = q.options[q.answer];
     const btns = document.querySelectorAll("#q-opts .opt-btn");
     btns[q.answer].classList.add("ok");
     if (!ok && quizCtx.selected !== null) btns[quizCtx.selected].classList.add("err");
   } else if (q.type === "build") {
-    ok = quizCtx.built.map(i => q.words[i]).join(" ").toLowerCase().trim() === q.en.toLowerCase().trim();
+    ok = !skipped && quizCtx.built.map(i => q.words[i]).join(" ").toLowerCase().trim() === q.en.toLowerCase().trim();
     rightTxt = q.en; if (ok) speak(q.en);
+  } else if (q.type === "type") {
+    const inp = document.getElementById("q-inp"); typedVal = inp ? inp.value : "";
+    ok = !skipped && gradeTyped(q, typedVal); rightTxt = q.answers[0];
+    if (inp) { inp.disabled = true; inp.classList.add(ok ? "ok" : "err"); }
   }
-  quizCtx.state = "next";
+  if (quizCtx.mode === "placement") {
+    quizCtx.lvlAns[q.lvl] = (quizCtx.lvlAns[q.lvl] || 0) + 1;
+    if (ok) quizCtx.lvlGot[q.lvl] = (quizCtx.lvlGot[q.lvl] || 0) + placementPts(q);
+    else if (q.type === "type") quizCtx.missed.push({ prompt: q.prompt, en: q.en || "", mine: skipped ? "" : typedVal.trim(), right: rightTxt });
+    const sk = document.getElementById("q-skip"); if (sk) sk.remove();
+  }
+  quizCtx.state = "next"; act.disabled = false;
   if (ok) {
     quizCtx.correct++; playTone(true); fb.className = "fb-box ok"; fb.innerText = "إجابة صحيحة! أحسنت 🎉";
     if (quizCtx.mode === "mistakes" && q.wordRef) { state.mistakes = state.mistakes.filter(m => m.en !== q.wordRef.en); saveState(); }
@@ -1635,12 +1710,16 @@ function finishQuiz() {
   document.getElementById("ov-fb").className = "fb-box";
 
   if (quizCtx.mode === "placement") {
-    let determined = "A1";
-    if (quizCtx.correct >= 10) determined = "B2";
-    else if (quizCtx.correct >= 7) determined = "B1";
-    else if (quizCtx.correct >= 4) determined = "A2";
+    // المستوى = أول مستوى ما اتجازش (أو B2 لو اتجاز كله)
+    const maxPts = {}, got = {}, doneLv = {};
+    quizCtx.questions.forEach(q => { maxPts[q.lvl] = (maxPts[q.lvl] || 0) + placementPts(q); });
+    LEVEL_ORDER.forEach(l => { got[l] = quizCtx.lvlGot[l] || 0; doneLv[l] = (quizCtx.lvlAns[l] || 0) > 0; });
+    let determined = "B2";
+    for (const l of LEVEL_ORDER) { if (!(doneLv[l] && got[l] >= PLACEMENT_PASS[l])) { determined = l; break; } }
+    let totalGot = 0, totalMax = 0;
+    LEVEL_ORDER.forEach(l => { if (doneLv[l]) { totalGot += got[l]; totalMax += maxPts[l]; } });
     const idx = LEVEL_ORDER.indexOf(determined);
-    state.placementDone = true; state.placementLevel = determined; state.placementScore = quizCtx.correct;
+    state.placementDone = true; state.placementLevel = determined; state.placementScore = totalGot;
     state.currentLevel = determined;
     state.unlockedLevels = LEVEL_ORDER.slice(0, idx + 1);
     // If the account can only open some levels (free trial = A1), start from an open level instead of a locked screen.
@@ -1655,7 +1734,10 @@ function finishQuiz() {
       <div class="study-card" style="margin-top:20px;">
         <div style="font-size:3.5rem;">🎯</div>
         <h2 style="margin:8px 0;">مستواك الحالي هو: <span style="color:var(--gold-light);">${determined}</span></h2>
-        <p style="color:var(--muted); margin-bottom:14px;">أجبت على <b>${quizCtx.correct}</b> من 12 سؤالاً بشكل صحيح. تم فتح المسار حتى مستوى <b>${determined}</b> تلقائياً!</p>
+        <p style="color:var(--muted); margin-bottom:10px;">حصلت على <b>${totalGot}</b> من <b>${totalMax}</b> نقطة. تم فتح المسار حتى مستوى <b>${determined}</b> تلقائياً!</p>
+        <div style="text-align:right; margin:0 0 12px; font-size:0.86rem; line-height:1.9;">${LEVEL_ORDER.map(l => doneLv[l] ? `<div>${got[l] >= PLACEMENT_PASS[l] ? "✅" : "❌"} <b>${l}</b>: ${got[l]} / ${maxPts[l]} <span style="color:var(--muted);">(النجاح ${PLACEMENT_PASS[l]})</span></div>` : `<div style="color:var(--muted);">➖ <b>${l}</b>: ما اتجاوبش</div>`).join("")}</div>
+        ${quizCtx.stoppedEarly ? `<p style="color:var(--muted); font-size:0.8rem; margin:0 0 10px;">وقفنا الاختبار بدري لأن مستويين ورا بعض ما اتجازوش.</p>` : ""}
+        ${quizCtx.missed.length ? `<div style="text-align:left; direction:ltr; margin:0 0 12px; font-size:0.8rem; line-height:1.7; background:var(--card-2); border-radius:12px; padding:10px 12px;"><div style="direction:rtl; text-align:right; color:var(--gold-light); font-weight:700; margin-bottom:4px;">إجابات كتابية محتاجة مراجعة:</div>${quizCtx.missed.slice(0, 6).map(m => `<div style="margin-bottom:6px;">${m.en ? escHtml(m.en) + "<br>" : ""}<span style="color:#fca5a5;">${m.mine ? escHtml(m.mine) : "—"}</span> → <span style="color:#86efac;">${escHtml(m.right)}</span></div>`).join("")}</div>` : ""}
         ${clampMsg}
         <div class="pill" style="display:inline-flex; padding:8px 18px;">⚡ +50 XP • 🏅 وسام تحديد المستوى</div>
       </div>
