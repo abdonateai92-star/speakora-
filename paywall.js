@@ -371,6 +371,7 @@ load();var sc=document.createElement("script");sc.src="chat-scripts.js";sc.onloa
     if (busy) return; busy = true;
     try {
       clearUi();
+      window.__spAllowed = null;
       if (!user) { if (adminBtn) { window.__spAdminMenu.clear(); adminBtn = null; } return; }
       var cfg = {};
       try { var c = await fbD.collection("paywall_config").doc("main").get(); cfg = c.exists ? c.data() : {}; }
@@ -413,6 +414,7 @@ load();var sc=document.createElement("script");sc.src="chat-scripts.js";sc.onloa
       }
       if (d.action === "free") return; // premium
       var allowed = d.allowed || [];
+      window.__spAllowed = allowed.slice();
       cur = d;
       // schedule re-check at next expiry
       var next = Infinity, until = (base.sub && base.sub.until) || {};
