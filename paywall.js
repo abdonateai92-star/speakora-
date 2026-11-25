@@ -140,7 +140,7 @@ load();var sc=document.createElement("script");sc.src="chat-scripts.js";sc.onloa
 }catch(e){console.warn("sp sara",e);}})();
   (function(){try{var f=document.getElementById("sp-pro-fab"),h=document.querySelector("#sc-path .hero");if(f&&h&&!f.classList.contains("sp-in")){h.parentNode.insertBefore(f,h);f.classList.add("sp-in");}}catch(e){}})();
   var ADMIN = "abdonateai92@gmail.com";
-  var TRIAL_MS = 60 * 60 * 1000;
+  var TRIAL_MS = 12 * 60 * 60 * 1000;
   var LEVELS = ["A1", "A2", "B1", "B2"];
 
   function activeLevels(sub, now) {
@@ -323,8 +323,8 @@ load();var sc=document.createElement("script");sc.src="chat-scripts.js";sc.onloa
     function tick() {
       leftMs -= 1000;
       if (leftMs <= 0) { evaluate(fbA.currentUser); return; }
-      var m = Math.floor(leftMs / 60000), s = Math.floor(leftMs / 1000) % 60;
-      pillEl.textContent = label + " " + m + ":" + (s < 10 ? "0" : "") + s;
+      var h = Math.floor(leftMs / 3600000), m = Math.floor(leftMs / 60000) % 60, s = Math.floor(leftMs / 1000) % 60;
+      pillEl.textContent = label + " " + h + ":" + (m < 10 ? "0" : "") + m + ":" + (s < 10 ? "0" : "") + s;
       timer = setTimeout(tick, 1000);
     }
     tick();
@@ -371,7 +371,7 @@ load();var sc=document.createElement("script");sc.src="chat-scripts.js";sc.onloa
     if (busy) return; busy = true;
     try {
       clearUi();
-      window.__spAllowed = null;
+      window.__spAllowed = null; window.__spTrialLessons = null;
       if (!user) { if (adminBtn) { window.__spAdminMenu.clear(); adminBtn = null; } return; }
       var cfg = {};
       try { var c = await fbD.collection("paywall_config").doc("main").get(); cfg = c.exists ? c.data() : {}; }
@@ -419,7 +419,7 @@ load();var sc=document.createElement("script");sc.src="chat-scripts.js";sc.onloa
       // schedule re-check at next expiry
       var next = Infinity, until = (base.sub && base.sub.until) || {};
       allowed.forEach(function (l) { var u = Number(until[l]) || 0; if (u > base.now && u < next) next = u; });
-      if (d.trial) { showPill(d.leftMs, "⏳ التجربة المجانية (A1):"); }
+      if (d.trial) { window.__spTrialLessons = 10; window.__spTrialLock = function () { showOverlay(function (b) { b.appendChild(el("div", "font-size:2.2rem", "🔒")); b.appendChild(el("h2", "margin:6px 0", "التجربة المجانية: أول ١٠ دروس")); b.appendChild(el("p", "font-size:0.9rem", "باقي دروس A1 للمشتركين. اشترك في المستوى A1 لفتحها كلها.")); payBox(b, user, cfg, "A1"); b.appendChild(btn("↩️ رجوع للدروس", "#7c3aed", function () { if (overlayEl) { overlayEl.remove(); overlayEl = null; } })); }, true); }; showPill(d.leftMs, "⏳ التجربة المجانية (A1، ١٢ ساعة أو ١٠ دروس):"); }
       else if (next < Infinity && next - base.now < 2147000000) timer = setTimeout(function () { evaluate(fbA.currentUser); }, next - base.now + 1000);
       if (!allowed.length) { showNone(user, cfg, !d.trial); return; }
       startWatch(user, cfg, allowed);
