@@ -4,6 +4,7 @@
    Unlocks live in subscriptions/{uid}: levels (array, e.g. ["A1","B1"]) and optional until (map level -> ms). */
 (function () {
   "use strict";
+  (function(){try{if(document.getElementById("sp-polish"))return;var s=document.createElement("style");s.id="sp-polish";s.textContent=":root{--r-card:18px;--r-btn:14px;--gold-text:#f4d77b;--pl-glow:0 0 0 1px rgba(212,175,55,.10) inset,0 10px 30px rgba(0,0,0,.45)}body.light{--muted:#52607a;--gold-text:#7a5c0e;--pl-glow:0 0 0 1px rgba(168,130,29,.10) inset,0 8px 24px rgba(20,24,33,.08)}.icon-btn{width:36px;height:36px;background:var(--card)}.icon-btn.gold-ring{border-color:var(--border-strong)}.pill{background:var(--card)}.wotd-card,.hero,.card,.goal-strip,.qa-btn{border-radius:var(--r-card)}.wotd-card{background:linear-gradient(135deg,rgba(212,175,55,.10),var(--card));box-shadow:var(--pl-glow)}.hero,.goal-strip,.qa-btn{box-shadow:var(--pl-glow)}body.light .wotd-card,body.light .goal-strip,body.light .qa-btn{background:#fff}body.light .wotd-card{background:linear-gradient(135deg,#fff8e1,#fff)}body.light .wotd-card .en-txt,body.light .wotd-card h3{color:var(--gold-text)}body.light .hero{background:linear-gradient(135deg,#fff6d8,#fff);border:1px solid rgba(168,130,29,.4)}body.light .hero h2{color:#141821}body.light .hero p{color:#475569}body.light .hero-meta,body.light .hero-tag{color:var(--gold-text)}.lvl-btn{border-radius:var(--r-btn)}.lvl-btn.locked{opacity:.78}.qa-btn{min-height:62px}.btn-gold,.btn-outline{border-radius:var(--r-btn);min-height:46px}.chip{border-radius:999px}.chips{padding-inline:2px}.bnav{border-top:1px solid var(--border)}.n-btn{position:relative;font-size:.72rem;font-weight:700}.n-btn .ic{font-size:1.25rem;filter:grayscale(1);opacity:.62;transition:opacity .2s}.n-btn.active .ic{filter:none;opacity:1}.n-btn.active::before{content:\"\";position:absolute;top:-1px;left:24%;right:24%;height:3px;border-radius:0 0 4px 4px;background:var(--gold-grad)}body.light .n-btn.active{color:var(--gold-text)}#sp-pro-fab{display:none!important}body:has(#sc-path.active):not(:has(#overlay.open)) #sp-pro-fab{display:block!important;right:12px!important;left:auto!important;bottom:96px!important;padding:8px 14px!important;font-size:.78rem!important}#open-admin-prof{background:transparent!important;color:var(--gold-text)!important;border:1px solid var(--border-strong)!important;box-shadow:none!important;text-align:right;font-weight:700;min-height:44px}#open-admin-prof:not([style*=\"none\"]){display:block!important}/* paywall / lock screens */.sp-ov{background:radial-gradient(circle at top,#1a2033 0,var(--bg,#090b10) 70%);color:var(--text,#f8fafc)}body.light .sp-ov{background:var(--bg,#f6f4ee)}.sp-box{background:var(--card,#151a26);border:1.5px solid var(--border-strong,rgba(212,175,55,.55));border-radius:24px;box-shadow:var(--pl-glow);padding:26px 22px}.sp-box h2{font-size:1.35rem;color:var(--text,#f8fafc)}.sp-box p{color:var(--muted,#94a3b8)}.sp-price1{color:var(--gold-text);font-weight:800;font-size:1.02rem}.sp-prices{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin:12px 0}.sp-pr{background:var(--card-2,#1c2233);border:1px solid var(--border,rgba(212,175,55,.22));border-radius:14px;padding:10px 6px}.sp-pr b{display:block;font-size:1.05rem;color:var(--text,#f8fafc)}.sp-pr span{color:var(--gold-text);font-weight:800;font-size:.9rem}.sp-steps{background:var(--card-2,#1c2233);border:1px solid var(--border,rgba(212,175,55,.22));border-radius:14px;padding:12px 14px;font-size:.92rem;line-height:2;text-align:right;color:var(--text,#f8fafc)}.sp-wallet{text-align:center;font-size:1.3rem;font-weight:800;color:var(--gold-text);direction:ltr;letter-spacing:1px;margin:4px 0}.sp-b{display:block;width:100%;margin:10px 0 0;padding:13px;min-height:48px;border-radius:var(--r-btn,14px);font-size:1rem;font-weight:800;cursor:pointer}.sp-b1{background:var(--gold-grad,linear-gradient(135deg,#f4d77b,#d4af37 52%,#a8821d));color:#090b10;border:0}.sp-b2{background:transparent;color:var(--gold-text);border:1.5px solid var(--border-strong,rgba(212,175,55,.55))}.sp-b3{background:transparent;color:var(--muted,#94a3b8);border:1px solid var(--border,rgba(212,175,55,.22));font-weight:700}.sp-am{background:var(--card,#1e293b);color:var(--gold-text);border:1px solid var(--border-strong,#d4af37);border-radius:999px;padding:7px 12px;font-size:.76rem;font-weight:700;cursor:pointer;white-space:nowrap;box-shadow:var(--pl-glow)}";(document.head||document.documentElement).appendChild(s);}catch(e){}})();
   var ADMIN = "abdonateai92@gmail.com";
   var TRIAL_MS = 60 * 60 * 1000;
   var LEVELS = ["A1", "A2", "B1", "B2"];
@@ -70,7 +71,7 @@
         if (panel.querySelector('[data-id="' + id + '"]')) return;
         var b = document.createElement("button");
         b.setAttribute("data-id", id); b.textContent = label;
-        b.style.cssText = "background:#1e293b;color:#fde68a;border:1px solid #d4af37;border-radius:20px;padding:7px 12px;font-size:0.76rem;font-weight:bold;cursor:pointer;white-space:nowrap";
+        b.className = "sp-am";
         b.onclick = function () { panel.style.display = "none"; fn(); };
         panel.appendChild(b);
       },
@@ -89,7 +90,8 @@
     return e;
   }
   function btn(label, bg, fn) {
-    var b = el("button", "display:block;width:100%;margin:8px 0;padding:13px;border:0;border-radius:12px;font-size:1rem;font-weight:bold;cursor:pointer;color:#fff;background:" + bg, label);
+    var b = el("button", "", label);
+    b.className = "sp-b " + (bg === "#16a34a" ? "sp-b1" : bg === "#334155" ? "sp-b3" : "sp-b2");
     b.onclick = fn; return b;
   }
   function stopWatch() { if (watch) { clearInterval(watch); watch = null; } }
@@ -102,8 +104,10 @@
   }
   function showOverlay(build, noLogout) {
     if (overlayEl) overlayEl.remove();
-    overlayEl = el("div", "position:fixed;inset:0;z-index:2147483000;background:#0b1220;color:#f8fafc;overflow-y:auto;direction:rtl;font-family:system-ui,-apple-system,sans-serif;padding:24px 18px;");
-    var box = el("div", "max-width:440px;margin:30px auto;background:#111a2e;border:1px solid #d4af37;border-radius:18px;padding:22px;text-align:center;line-height:1.8;");
+    overlayEl = el("div", "position:fixed;inset:0;z-index:2147483000;overflow-y:auto;direction:rtl;padding:24px 18px;");
+    overlayEl.className = "sp-ov";
+    var box = el("div", "max-width:440px;margin:30px auto;text-align:center;line-height:1.8;");
+    box.className = "sp-box";
     build(box);
     if (!noLogout) box.appendChild(btn("تسجيل خروج", "#334155", function () { fbA.signOut().then(function () { clearUi(); }); }));
     overlayEl.appendChild(box);
@@ -122,11 +126,12 @@
     return LEVELS.map(function (l) { return l + " = " + priceOf(cfg, l) + " جنيه"; }).join(" | ");
   }
   function payBox(b, user, cfg, level) {
-    b.appendChild(el("p", "color:#fde68a;font-size:1.05rem;font-weight:bold", priceText(cfg, level)));
+    if (level) { var pp = el("p", "", priceText(cfg, level)); pp.className = "sp-price1"; b.appendChild(pp); }
+    else { var g = el("div", ""); g.className = "sp-prices"; LEVELS.forEach(function (l) { var c = el("div", ""); c.className = "sp-pr"; c.appendChild(el("b", "", l)); c.appendChild(el("span", "", priceOf(cfg, l) + " جنيه")); g.appendChild(c); }); b.appendChild(g); }
     var wallet = String(cfg.wallet || "").trim();
-    var steps = el("div", "text-align:right;background:#0b1220;border-radius:12px;padding:12px 14px;font-size:0.92rem;color:#e2e8f0");
+    var steps = el("div", ""); steps.className = "sp-steps";
     steps.appendChild(el("div", "", "1) حوّل " + (level ? priceOf(cfg, level) + " جنيه" : "سعر المستوى") + " بفودافون كاش على الرقم:"));
-    steps.appendChild(el("div", "text-align:center;font-size:1.3rem;font-weight:bold;color:#fde68a;direction:ltr;margin:6px 0", wallet || "الرقم غير مضبوط بعد"));
+    var wl = el("div", "", wallet || "الرقم غير مضبوط بعد"); wl.className = "sp-wallet"; steps.appendChild(wl);
     steps.appendChild(el("div", "", "2) ابعت صورة التحويل وإيميلك" + (level ? " واسم المستوى (" + level + ")" : "") + " على واتساب."));
     steps.appendChild(el("div", "", "3) نفعّل المستوى خلال 24 ساعة من التحويل."));
     b.appendChild(steps);
@@ -139,8 +144,8 @@
     showOverlay(function (b) {
       b.appendChild(el("div", "font-size:2.2rem", "📧"));
       b.appendChild(el("h2", "margin:6px 0", "فعّل بريدك الإلكتروني"));
-      b.appendChild(el("p", "color:#cbd5e1", "أرسلنا رابط التفعيل إلى: " + user.email));
-      b.appendChild(el("p", "color:#94a3b8;font-size:0.85rem", "افتح الإيميل واضغط على الرابط (شوف مجلد Spam كمان)، ثم ارجع واضغط الزر."));
+      b.appendChild(el("p", "", "أرسلنا رابط التفعيل إلى: " + user.email));
+      b.appendChild(el("p", "font-size:0.85rem", "افتح الإيميل واضغط على الرابط (شوف مجلد Spam كمان)، ثم ارجع واضغط الزر."));
       var msg = el("p", "color:#fca5a5;font-size:0.85rem;min-height:1.2em", "");
       b.appendChild(btn("✅ فعّلت البريد، تابع", "#16a34a", function () {
         user.reload().then(function () { msg.textContent = ""; evaluate(fbA.currentUser); }).catch(function () { msg.textContent = "تعذر التحقق، حاول مرة أخرى."; });
@@ -157,7 +162,7 @@
     showOverlay(function (b) {
       b.appendChild(el("div", "font-size:2.2rem", "🔒"));
       b.appendChild(el("h2", "margin:6px 0", trialOver ? "انتهت التجربة المجانية" : "اشترك لفتح المستويات"));
-      b.appendChild(el("p", "color:#cbd5e1;font-size:0.9rem", "كل مستوى (A1، A2، B1، B2) يتفتح لوحده. اختر المستوى اللي عايزه."));
+      b.appendChild(el("p", "font-size:0.9rem", "كل مستوى (A1، A2، B1، B2) يتفتح لوحده. اختر المستوى اللي عايزه."));
       payBox(b, user, cfg, "");
     });
   }
@@ -167,7 +172,7 @@
     showOverlay(function (b) {
       b.appendChild(el("div", "font-size:2.2rem", "🔒"));
       b.appendChild(el("h2", "margin:6px 0", "المستوى " + level + " مقفول"));
-      b.appendChild(el("p", "color:#cbd5e1;font-size:0.9rem", "اشترك في المستوى " + level + " لفتحه."));
+      b.appendChild(el("p", "font-size:0.9rem", "اشترك في المستوى " + level + " لفتحه."));
       payBox(b, user, cfg, level);
       if (allowed.length) b.appendChild(btn("↩️ رجوع لمستوى مفتوح (" + allowed[0] + ")", "#7c3aed", function () {
         try { state.currentLevel = allowed[0]; saveState(); renderPath(); } catch (e) {}
