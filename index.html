@@ -2679,7 +2679,7 @@ if (useCloud && fbAuth) {
     const msg = `أتدرب على الإنجليزية حتى مستوى B2 عبر منصة Speakora 🚀\n🔥 الاستمرارية: ${streak} يوم | 🧠 جمل للمراجعة: ${vault.length}\nجرّبها من هنا: ${SITE_URL}`;
     if (navigator.clipboard && navigator.clipboard.writeText) {
       navigator.clipboard.writeText(msg).then(() => {
-        alert('تم نسخ رسالة التقدم ورابط Speakora! يمكنك لصقها ومشاركتها الآن.');
+        toast('تم نسخ رسالة التقدم، الصقها وشاركها ✓');
       }).catch(() => {
         prompt('انسخ النص التالي للمشاركة:', msg);
       });
@@ -2689,7 +2689,7 @@ if (useCloud && fbAuth) {
   };
 
   window.spProSpeak = function(text) {
-    if (!('speechSynthesis' in window)) return alert('المتصفح لا يدعم النطق الصوتي');
+    if (!('speechSynthesis' in window)) return toast('المتصفح لا يدعم النطق الصوتي');
     window.speechSynthesis.cancel();
     const u = new SpeechSynthesisUtterance(text);
     u.lang = 'en-US';
@@ -2774,9 +2774,9 @@ if (useCloud && fbAuth) {
       vault.push({ ...item, addedAt: new Date().toLocaleDateString('ar-EG') });
       localStorage.setItem('speakora_vault_v1', JSON.stringify(vault));
       updateVaultBadge();
-      alert('تمت إضافة الجملة إلى خزنة المراجعة الذكية!');
+      toast('تمت إضافة الجملة إلى الخزنة ⭐');
     } else {
-      alert('هذه الجملة موجودة بالفعل في خزنتك.');
+      toast('الجملة موجودة بالفعل في خزنتك');
     }
   };
 
