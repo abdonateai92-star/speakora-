@@ -391,7 +391,7 @@ body.light .n-btn.active { color: var(--gold-dark); }
         <circle cx="48" cy="18" r="4" fill="#f4d77b"/>
       </svg>
       <h1>Speakora</h1>
-      <p>منصتك الذكية لإتقان 1000 كلمة من A1 إلى B2</p>
+      <p>منصتك الذكية لإتقان 4000 كلمة من A1 إلى B2</p>
       <span class="mode-pill" id="cloud-status-pill">⚡ وضع التشغيل المحلي الذكي</span>
     </div>
 
@@ -679,9 +679,9 @@ body.light .n-btn.active { color: var(--gold-dark); }
       <h3>عبدالرحمن نتعي عبدالرحمن</h3>
       <p style="font-size:0.78rem; color:#cbd5e1;">مؤسس ومطور منصة Speakora لتعليم اللغة الإنجليزية.</p>
       <div class="dev-links">
-        <a class="dev-link" href="https://wa.me/966574767428" target="_blank">💬 واتساب السعودية</a>
+        <a class="dev-link" href="https://wa.me/966574767428" target="_blank" rel="noopener">💬 واتساب السعودية</a>
         <a class="dev-link" href="tel:0574767428">📞 0574767428</a>
-        <a class="dev-link" href="https://wa.me/201271109660" target="_blank">💬 واتساب مصر</a>
+        <a class="dev-link" href="https://wa.me/201271109660" target="_blank" rel="noopener">💬 واتساب مصر</a>
         <a class="dev-link" href="tel:01271109660">📞 01271109660</a>
         <a class="dev-link full" href="mailto:Abdonateai92@gmail.com">✉️ Abdonateai92@gmail.com</a>
       </div>
@@ -715,7 +715,7 @@ body.light .n-btn.active { color: var(--gold-dark); }
 <div class="overlay" id="search-overlay">
   <div class="ov-top">
     <button class="icon-btn" id="search-close">✕</button>
-    <input class="inp" id="global-search-inp" style="margin:0; flex:1;" placeholder="ابحث في 1000 كلمة و80 جملة (عربي أو إنجليزي)...">
+    <input class="inp" id="global-search-inp" style="margin:0; flex:1;" placeholder="ابحث في 4000 كلمة و80 جملة (عربي أو إنجليزي)...">
   </div>
   <div class="ov-body" id="search-results"></div>
 </div>
@@ -1328,14 +1328,14 @@ function renderStudyCard() {
   document.getElementById("ov-body").innerHTML = `
     <div class="study-card">
       <span class="q-tag">بطاقة ${idx + 1} من ${words.length}</span>
-      <div class="study-word">${w.en}</div>
-      ${w.ph ? `<div class="ph-tag">النطق: ${w.ph}</div>` : ""}
-      <div class="study-ar">${w.ar}</div>
+      <div class="study-word">${escHtml(w.en)}</div>
+      ${w.ph ? `<div class="ph-tag">النطق: ${escHtml(w.ph)}</div>` : ""}
+      <div class="study-ar">${escHtml(w.ar)}</div>
       <div style="display:flex; justify-content:center; gap:8px; margin-top:12px;">
         <button class="btn-outline" style="width:auto; padding:7px 14px;" id="st-say">🔊 استمع</button>
         <button class="btn-outline" style="width:auto; padding:7px 14px;" id="st-slow">🐢 بطيء</button>
       </div>
-      ${w.ex ? `<div class="study-ex">"${w.ex}"</div>` : ""}
+      ${w.ex ? `<div class="study-ex">"${escHtml(w.ex)}"</div>` : ""}
     </div>
     <button class="btn-outline ${autoModeActive ? "active-play" : ""}" id="st-auto-btn" style="margin-bottom:9px;">
       ${autoModeActive ? "⏹️ إيقاف الاستماع التلقائي" : "🎧 تشغيل الاستماع التلقائي لكلمات الدرس"}
@@ -1429,7 +1429,7 @@ function startSpeedChallenge() {
     document.getElementById("ov-body").innerHTML = `
       <div class="study-card" style="padding:18px; margin-bottom:14px;">
         <span class="q-tag">أجب بأسرع ما يمكن!</span>
-        <div class="study-word" style="font-size:1.7rem;">${w.en}</div>
+        <div class="study-word" style="font-size:1.7rem;">${escHtml(w.en)}</div>
       </div>
       <div class="opt-list" id="sp-opts"></div>
     `;
@@ -1669,7 +1669,7 @@ function renderSentences() {
   const list = document.getElementById("sent-list"); list.innerHTML = "";
   getFilteredSentences().forEach(s => {
     const d = document.createElement("div"); d.className = "card";
-    d.innerHTML = `<span class="ph-tag">${s.lvl} • ${s.cat}</span><div class="en-row"><div class="en-txt">${s.en}</div><div class="mini-actions"><button class="mini-btn s-play">🔊</button><button class="mini-btn s-slow">🐢</button></div></div><div class="ar-txt">${s.ar}</div>${s.ph ? `<div class="ph-tag">${s.ph}</div>` : ""}`;
+    d.innerHTML = `<span class="ph-tag">${escHtml(s.lvl)} • ${escHtml(s.cat)}</span><div class="en-row"><div class="en-txt">${escHtml(s.en)}</div><div class="mini-actions"><button class="mini-btn s-play">🔊</button><button class="mini-btn s-slow">🐢</button></div></div><div class="ar-txt">${escHtml(s.ar)}</div>${s.ph ? `<div class="ph-tag">${escHtml(s.ph)}</div>` : ""}`;
     d.querySelector(".s-play").onclick = () => speak(s.en);
     d.querySelector(".s-slow").onclick = () => speak(s.en, 0.62);
     list.appendChild(d);
@@ -1762,7 +1762,7 @@ function renderDict() {
   list.innerHTML = state.customWords.length ? "" : `<div class="card" style="text-align:center; color:var(--muted);">لم تضف كلمات خاصة بعد.</div>`;
   state.customWords.forEach((w, i) => {
     const d = document.createElement("div"); d.className = "card";
-    d.innerHTML = `<div class="en-row"><span class="en-txt">${w.en}</span><div class="mini-actions"><button class="mini-btn cs">🔊</button><button class="mini-btn cd">🗑️</button></div></div><div class="ar-txt">${w.ar}</div>${w.ph ? `<div class="ph-tag">${w.ph}</div>` : ""}`;
+    d.innerHTML = `<div class="en-row"><span class="en-txt">${escHtml(w.en)}</span><div class="mini-actions"><button class="mini-btn cs">🔊</button><button class="mini-btn cd">🗑️</button></div></div><div class="ar-txt">${escHtml(w.ar)}</div>${w.ph ? `<div class="ph-tag">${escHtml(w.ph)}</div>` : ""}`;
     d.querySelector(".cs").onclick = () => speak(w.en);
     d.querySelector(".cd").onclick = () => { state.customWords.splice(i, 1); saveState(); renderDict(); };
     list.appendChild(d);
@@ -1771,7 +1771,7 @@ function renderDict() {
   ml.innerHTML = state.mistakes.length ? "" : `<div class="card" style="text-align:center; color:var(--success);">بنك الأخطاء فارغ! 🎉</div>`;
   state.mistakes.forEach(w => {
     const d = document.createElement("div"); d.className = "card";
-    d.innerHTML = `<div class="en-row"><span class="en-txt">${w.en}</span><button class="mini-btn ms">🔊</button></div><div class="ar-txt">${w.ar}</div>`;
+    d.innerHTML = `<div class="en-row"><span class="en-txt">${escHtml(w.en)}</span><button class="mini-btn ms">🔊</button></div><div class="ar-txt">${escHtml(w.ar)}</div>`;
     d.querySelector(".ms").onclick = () => speak(w.en);
     ml.appendChild(d);
   });
@@ -1780,21 +1780,21 @@ function renderDict() {
 function renderSearch(q) {
   const res = document.getElementById("search-results");
   const term = (q || "").trim().toLowerCase();
-  if (!term) { res.innerHTML = `<div class="card" style="text-align:center; color:var(--muted);">اكتب أي كلمة بالعربي أو الإنجليزي للبحث الفوري في 1000 كلمة و80 جملة...</div>`; return; }
+  if (!term) { res.innerHTML = `<div class="card" style="text-align:center; color:var(--muted);">اكتب أي كلمة بالعربي أو الإنجليزي للبحث الفوري في 4000 كلمة و80 جملة...</div>`; return; }
   const wHits = [...state.customWords.map(w => Object.assign({ lvl: "قاموسي" }, w)), ...getAllWordsFlat()]
     .filter(w => w.en.toLowerCase().includes(term) || w.ar.includes(term)).slice(0, 35);
   const sHits = getAllSentences().filter(s => s.en.toLowerCase().includes(term) || s.ar.includes(term)).slice(0, 15);
-  if (!wHits.length && !sHits.length) { res.innerHTML = `<div class="card" style="text-align:center; color:var(--muted);">لا توجد نتائج مطابقة لـ "${q}"</div>`; return; }
+  if (!wHits.length && !sHits.length) { res.innerHTML = `<div class="card" style="text-align:center; color:var(--muted);">لا توجد نتائج مطابقة لـ "${escHtml(q)}"</div>`; return; }
   res.innerHTML = "";
   wHits.forEach(w => {
     const d = document.createElement("div"); d.className = "card";
-    d.innerHTML = `<span class="ph-tag">${w.lvl}</span><div class="en-row"><span class="en-txt">${w.en}</span><button class="mini-btn">🔊</button></div><div class="ar-txt">${w.ar}</div>${w.ex ? `<div class="ex-txt">"${w.ex}"</div>` : ""}`;
+    d.innerHTML = `<span class="ph-tag">${escHtml(w.lvl)}</span><div class="en-row"><span class="en-txt">${escHtml(w.en)}</span><button class="mini-btn">🔊</button></div><div class="ar-txt">${escHtml(w.ar)}</div>${w.ex ? `<div class="ex-txt">"${escHtml(w.ex)}"</div>` : ""}`;
     d.querySelector("button").onclick = () => speak(w.en);
     res.appendChild(d);
   });
   sHits.forEach(s => {
     const d = document.createElement("div"); d.className = "card";
-    d.innerHTML = `<span class="ph-tag">جملة • ${s.lvl}</span><div class="en-row"><span class="en-txt">${s.en}</span><button class="mini-btn">🔊</button></div><div class="ar-txt">${s.ar}</div>`;
+    d.innerHTML = `<span class="ph-tag">جملة • ${escHtml(s.lvl)}</span><div class="en-row"><span class="en-txt">${escHtml(s.en)}</span><button class="mini-btn">🔊</button></div><div class="ar-txt">${escHtml(s.ar)}</div>`;
     d.querySelector("button").onclick = () => speak(s.en);
     res.appendChild(d);
   });
@@ -1894,7 +1894,7 @@ function escHtml(s) { return String(s == null ? "" : s).replace(/[&<>"']/g, c =>
     const accs = getLocalAccounts();
     users = Object.values(accs).map(a => a.data).filter(Boolean);
   }
-  const totalXp = users.reduce((s, u) => s + (u.xp || 0), 0);
+  const totalXp = users.reduce((s, u) => s + (Number(u.xp) || 0), 0);
   body.innerHTML = `
     <div class="stats-grid">
       <div class="stat-box"><div class="stat-num">${users.length}</div><div class="stat-lbl">إجمالي المستخدمين</div></div>
@@ -1906,14 +1906,14 @@ function escHtml(s) { return String(s == null ? "" : s).replace(/[&<>"']/g, c =>
       <div class="card">
         <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:5px;">
           <strong>${escHtml(u.avatar || "🎓")} ${escHtml(u.name || "بدون اسم")}</strong>
-          <span class="ph-tag" style="margin:0;">المستوى: ${u.currentLevel || "A1"}</span>
+          <span class="ph-tag" style="margin:0;">المستوى: ${escHtml(u.currentLevel || "A1")}</span>
         </div>
         <div style="font-size:0.76rem; color:var(--muted); margin-bottom:6px;">${escHtml(u.email || "")}</div>
         <div style="display:flex; gap:10px; font-size:0.78rem; color:var(--gold-light); font-weight:700;">
         ${u._uid ? `<button class="mini-btn" style="width:auto; padding:0 10px; border-radius:11px; font-size:0.74rem; margin-bottom:6px;" onclick="adminTogglePremium('${u._uid}', ${!adminEnt[u._uid]})">${adminEnt[u._uid] ? "⭐ بريميوم (سحب)" : "منح بريميوم"}</button>` : ""}
-          <span>⚡ ${u.xp || 0} XP</span>
+          <span>⚡ ${escHtml(Number(u.xp) || 0)} XP</span>
           <span>📚 ${getTotalMastered(u)} كلمة</span>
-          <span>🎯 تحديد: ${u.placementLevel || "-"}</span>
+          <span>🎯 تحديد: ${escHtml(u.placementLevel || "-")}</span>
         </div>
       </div>
     `).join("") || `<div class="card" style="text-align:center;">لا يوجد مستخدمون بعد.</div>`}
@@ -2318,7 +2318,7 @@ document.getElementById("import-file-inp").onchange = e => {
   r.onload = () => {
     try {
       const parsed = JSON.parse(r.result);
-      if (typeof parsed.xp === "number") { state = Object.assign(state, parsed); saveState(); renderAll(); toast("تمت استعادة النسخة الاحتياطية بنجاح ✓"); }
+      if (parsed && typeof parsed === "object" && typeof parsed.xp === "number") { const tpl = createEmptyState(), safe = {}; Object.keys(tpl).forEach(k => { if (k === "email" || k === "uid" || k === "isAdmin") return; if (parsed[k] !== undefined && typeof parsed[k] === typeof tpl[k] && Array.isArray(parsed[k]) === Array.isArray(tpl[k])) safe[k] = parsed[k]; }); if (!["A1","A2","B1","B2"].includes(safe.currentLevel)) safe.currentLevel = state.currentLevel; if (!(safe.xp >= 0 && safe.xp <= 100000)) safe.xp = state.xp; state = Object.assign(state, safe); saveState(); renderAll(); toast("تمت استعادة النسخة الاحتياطية بنجاح ✓"); }
       else toast("ملف غير صالح");
     } catch (err) { toast("تعذر قراءة الملف"); }
   };
