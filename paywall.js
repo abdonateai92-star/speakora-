@@ -90,6 +90,52 @@ $("sp-c-save").onclick=async function(){try{save(info&&info.blob?info.blob:await
 $("sp-c-wa").onclick=async function(){var wa=function(){window.open("https://wa.me/?text="+encodeURIComponent(msg()),"_blank");};try{var bl=info&&info.blob?info.blob:await png(),f=new File([bl],fname(),{type:"image/png"});if(navigator.canShare&&navigator.canShare({files:[f]})){await navigator.share({files:[f],text:msg()});return;}}catch(e){if(e&&e.name==="AbortError")return;}wa();};
 if(window.MutationObserver)new MutationObserver(function(){if(modal.classList.contains("open"))fill();}).observe(modal,{attributes:true,attributeFilter:["class"]});
 }catch(e){console.warn("sp cert",e);}})();
+  (function(){try{if(document.getElementById("sp-sara"))return;var pr=document.getElementById("sc-practice");if(!pr)return;var tabs=pr.querySelector(".sub-tabs");if(!tabs)return;
+var H=document.head||document.documentElement,KEY="spk_sara_v1";
+var st=document.createElement("style");st.id="sp-sara";st.textContent=
+"#pane-sara .sa-top{display:flex;align-items:center;gap:10px;margin-bottom:10px}#pane-sara .sa-av{width:40px;height:40px;border-radius:50%;border:1.5px solid var(--gold);display:grid;place-items:center;font-weight:900;color:var(--gold-text,var(--gold-light));flex-shrink:0;background:var(--card)}"+
+"#pane-sara .sa-top b{display:block;font-size:.92rem}#pane-sara .sa-top small{color:var(--muted);font-size:.72rem}"+
+"#pane-sara .sa-bar{height:7px;border-radius:99px;background:var(--bg-soft);overflow:hidden;margin:6px 0 4px;border:1px solid var(--border)}#pane-sara .sa-bar i{display:block;height:100%;background:var(--gold-grad);border-radius:99px}"+
+"#pane-sara .sa-meta{display:flex;justify-content:space-between;font-size:.72rem;color:var(--muted);margin-bottom:10px}"+
+"#pane-sara .reply-btn{width:100%}#pane-sara .reply-btn.bad{border-color:var(--danger);background:var(--danger-bg)}#pane-sara .reply-btn.weak{border-color:#d9922b;background:rgba(217,146,43,.13)}#pane-sara .reply-btn.good{border-color:var(--success);background:var(--success-bg)}#pane-sara .reply-btn[disabled]{opacity:.9}"+
+"#pane-sara .sa-fb{direction:rtl;text-align:right;font-size:.82rem;line-height:1.7;border-radius:12px;padding:9px 12px;margin:-2px 0 2px;border:1px solid var(--danger);background:var(--danger-bg);color:var(--text)}#pane-sara .sa-fb.weak{border-color:#d9922b;background:rgba(217,146,43,.13)}#pane-sara .sa-fb b{direction:ltr;display:inline-block;color:var(--gold-text,var(--gold-light))}body.light #pane-sara .sa-fb b{color:var(--gold-dark)}"+
+"#sc-practice .sub-tab{font-size:.74rem!important;padding-inline:8px!important;white-space:nowrap}#pane-sara .sa-ch{scrollbar-width:none}#pane-sara .sa-ch::-webkit-scrollbar{display:none}"+
+"#pane-sara .sa-ch{display:flex;gap:6px;overflow-x:auto;margin-bottom:10px;padding-bottom:2px}#pane-sara .sa-ch span{white-space:nowrap;font-size:.72rem;font-weight:800;border:1px solid var(--border);border-radius:99px;padding:5px 11px;color:var(--muted);background:var(--card)}#pane-sara .sa-ch span.on{color:#2b2110;background:var(--gold-grad);border-color:transparent}#pane-sara .sa-ch span.dn{color:var(--success);border-color:var(--success)}"+
+"#pane-sara .sa-end{text-align:center}#pane-sara .sa-end h3{margin:8px 0}";H.appendChild(st);
+var tab=document.createElement("button");tab.className="sub-tab";tab.setAttribute("data-ptab","sara");tab.textContent="💬 سارة";tab.style.display="none";tabs.appendChild(tab);
+var pane=document.createElement("div");pane.id="pane-sara";pane.style.display="none";pr.appendChild(pane);
+var others=["roleplay","coach","templates"];
+tab.addEventListener("click",function(){tabs.querySelectorAll(".sub-tab").forEach(function(b){b.classList.remove("active");});tab.classList.add("active");others.forEach(function(k){var p=document.getElementById("pane-"+k);if(p)p.style.display="none";});pane.style.display="block";render();});
+tabs.querySelectorAll(".sub-tab").forEach(function(b){if(b!==tab)b.addEventListener("click",function(){pane.style.display="none";},true);});
+var CH=null,save={},S=null;
+function load(){try{save=JSON.parse(localStorage.getItem(KEY)||"{}")||{};}catch(e){save={};}}
+function persist(){try{localStorage.setItem(KEY,JSON.stringify(save));}catch(e){}}
+function flat(c){var a=[];c.chapters.forEach(function(ch,ci){ch.steps.forEach(function(s){a.push({s:s,ci:ci});});});return a;}
+function sp(t){try{if(typeof speak==="function")speak(t);}catch(e){}}
+function el(t,c,h){var e=document.createElement(t);if(c)e.className=c;if(h!=null)e.innerHTML=h;return e;}
+function esc(s){return String(s).replace(/[&<>]/g,function(m){return {"&":"&amp;","<":"&lt;",">":"&gt;"}[m];});}
+function open(i){CH=window.SPK_CHATS[i];var p=save[CH.id]||{step:0,mist:0,done:false,xp:false};S=p;save[CH.id]=p;}
+function stars(m,n){return m===0?3:m<=n*0.2?2:1;}
+function render(){if(!window.SPK_CHATS||!window.SPK_CHATS.length){pane.innerHTML="";return;}if(!CH)open(0);var all=flat(CH),n=all.length,i=Math.min(S.step,n),cur=all[i],ci=cur?cur.ci:CH.chapters.length-1;
+pane.innerHTML="";var top=el("div","card");
+top.appendChild(el("div","sa-top",'<div class="sa-av">S</div><div style="flex:1"><b>سارة · موظفة الاستقبال</b><small>'+esc(CH.title)+' · '+esc(CH.level)+'</small></div>'));
+var chips=el("div","sa-ch");CH.chapters.forEach(function(c,k){var sp2=el("span",k<ci||S.done?"dn":k===ci?"on":"",esc(c.title));chips.appendChild(sp2);});top.appendChild(chips);
+var inCh=0,chN=CH.chapters[ci].steps.length,passed=0;for(var k=0;k<i;k++)if(all[k].ci===ci)passed++;inCh=passed;
+top.appendChild(el("div","sa-bar",'<i style="width:'+Math.round((S.done?n:i)/n*100)+'%"></i>'));
+top.appendChild(el("div","sa-meta","<span>الرد "+(S.done?n:Math.min(i+1,n))+" من "+n+"</span><span>"+esc(CH.chapters[ci].title)+": "+(S.done?chN:Math.min(inCh+1,chN))+"/"+chN+"</span>"));
+var chat=el("div","chat-box");
+function bub(from,en,ar){var b=el("div","bubble "+from,'<div style="display:flex;justify-content:space-between;align-items:center;gap:8px"><span>'+esc(en)+'</span><button class="mini-btn" style="width:27px;height:27px;font-size:.74rem">🔊</button></div><div class="bubble-ar">'+esc(ar)+"</div>");b.onclick=function(){b.classList.toggle("show-ar");};b.querySelector("button").onclick=function(e){e.stopPropagation();sp(en);};chat.appendChild(b);}
+var from=Math.max(0,i-3);if(from>0){chat.appendChild(el("div","",'<p style="text-align:center;color:var(--muted);font-size:.72rem">... المحادثة السابقة محفوظة</p>'));}
+for(var k2=from;k2<i&&k2<n;k2++){var q=all[k2].s,ok=q.opts.filter(function(o){return o.ok;})[0];bub("bot",q.bot,q.botAr);bub("user",ok.en,ok.ar);}
+if(cur)bub("bot",cur.s.bot,cur.s.botAr);else bub("bot",CH.end.bot,CH.end.botAr);
+top.appendChild(chat);var box=el("div","reply-opts");
+if(cur){var tried={};cur.s.opts.forEach(function(o,oi){var b=el("button","reply-btn",esc(o.en)+"<small>"+esc(o.ar)+"</small>");b.onclick=function(){
+if(o.ok){sp(o.en);b.classList.add("good");S.step=i+1;if(S.step>=n){S.done=true;var stz=stars(S.mist,n);save[CH.id].stars=Math.max(save[CH.id].best||0,stz);save[CH.id].best=save[CH.id].stars;if(!S.xp){S.xp=true;try{addXp(stz===3?60:40);}catch(e){}}}persist();setTimeout(render,350);return;}
+if(!tried[oi]){tried[oi]=1;S.mist++;persist();}b.disabled=true;b.classList.add(o.kind==="weak"?"weak":"bad");var fb=el("div","sa-fb"+(o.kind==="weak"?" weak":""),(o.kind==="weak"?"مفهومة بس ناقصة. ":"فيها غلطة. ")+'الأحسن تقول: <b>'+esc(o.fix)+"</b><br>"+esc(o.hint));b.parentNode.insertBefore(fb,b.nextSibling);sp(o.fix);};box.appendChild(b);});}
+else{var stz2=S.best||stars(S.mist,n);box.appendChild(el("div","fb-box ok sa-end",'<div style="font-size:2rem">🎉</div><h3>خلّصت المحادثة!</h3><div style="font-size:1.4rem">'+"⭐".repeat(stz2)+'</div><p style="margin-top:6px;font-size:.8rem">غلطاتك: '+S.mist+' من '+n+' رد</p>'));var rb=el("button","btn-outline","إعادة المحادثة من الأول");rb.style.marginTop="10px";rb.onclick=function(){save[CH.id]={step:0,mist:0,done:false,xp:true,best:S.best};persist();CH=null;render();};box.appendChild(rb);}
+top.appendChild(box);pane.appendChild(top);}
+load();var sc=document.createElement("script");sc.src="chat-scripts.js";sc.onload=function(){if(window.SPK_CHATS&&window.SPK_CHATS.length){tab.style.display="";if(pane.style.display==="block")render();}};sc.onerror=function(){};document.head.appendChild(sc);
+}catch(e){console.warn("sp sara",e);}})();
   (function(){try{var f=document.getElementById("sp-pro-fab"),h=document.querySelector("#sc-path .hero");if(f&&h&&!f.classList.contains("sp-in")){h.parentNode.insertBefore(f,h);f.classList.add("sp-in");}}catch(e){}})();
   var ADMIN = "abdonateai92@gmail.com";
   var TRIAL_MS = 60 * 60 * 1000;
