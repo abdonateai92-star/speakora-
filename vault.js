@@ -147,12 +147,77 @@
       alert("تم تثبيت " + n + " حساب ✅");
     } catch (e) { alert("فشل: " + (e && e.message || e)); }
   }
+  // Add or update work tracks from a JSON file the admin picks on their device. The file is never stored in the repo.
+  // File: {"tracks":[{"id":"J_x","name":"...","icon":"..."}],"data":{"J_x":{"words":[["en","ar","ph","ex"],...]}}}
+  var HARD = { J_hotel_driver: 1, J_cashier: 1 };
+  function checkTracksFile(o) {
+    if (!o || typeof o !== "object" || !o.data || typeof o.data !== "object") return "الملف مش بالشكل المطلوب.";
+    var ids = Object.keys(o.data);
+    if (!ids.length) return "الملف فاضي.";
+    var tracks = Array.isArray(o.tracks) ? o.tracks : [];
+    for (var i = 0; i < ids.length; i++) {
+      var id = ids[i], t = o.data[id];
+      if (!/^J_[a-z0-9_]+$/i.test(id)) return "اسم مسار غير صالح: " + id;
+      if (!t || !Array.isArray(t.words) || !t.words.length) return "المسار " + id + " بدون كلمات.";
+      for (var j = 0; j < t.words.length; j++) {
+        var w = t.words[j];
+        if (!Array.isArray(w) || w.length < 2 || typeof w[0] !== "string" || typeof w[1] !== "string") return "كلمة غير صالحة في " + id + " رقم " + (j + 1);
+      }
+      if (!HARD[id] && !tracks.some(function (x) { return x && x.id === id && typeof x.name === "string" && x.name; })) return "المسار " + id + " ناقص اسم في tracks.";
+    }
+    return null;
+  }
+  function mergeJobs(existingJson, o) {
+    var cur = {};
+    try { cur = existingJson ? JSON.parse(existingJson) : {}; } catch (e) { cur = {}; }
+    if (!cur || typeof cur !== "object") cur = {};
+    var list = Array.isArray(cur.__tracks) ? cur.__tracks.slice() : [];
+    Object.keys(o.data).forEach(function (id) { cur[id] = o.data[id]; });
+    (o.tracks || []).forEach(function (t) {
+      if (!t || HARD[t.id] || !o.data[t.id]) return;
+      var k = list.findIndex(function (x) { return x && x.id === t.id; });
+      var item = { id: t.id, name: t.name, icon: t.icon || "💼" };
+      if (k >= 0) list[k] = item; else list.push(item);
+    });
+    cur.__tracks = list;
+    return JSON.stringify(cur);
+  }
+  async function importTracks(text, skipConfirm) {
+    var o;
+    try { o = JSON.parse(text); } catch (e) { alert("الملف مش JSON صحيح."); return; }
+    var bad = checkTracksFile(o);
+    if (bad) { alert(bad); return; }
+    try {
+      var snap = await fbD.collection("content").doc("jobs").get();
+      var existing = snap.exists && snap.data() && typeof snap.data().data === "string" ? snap.data().data : "";
+      var merged = mergeJobs(existing, o), n = bytes(merged);
+      if (n > 900000) { alert("حجم مسارات المهن كبير جداً (" + n + " بايت). أوقف الرفع."); return; }
+      var names = Object.keys(o.data).map(function (id) { return id + " (" + o.data[id].words.length + ")"; }).join("\n");
+      if (!skipConfirm && !confirm("رفع " + Object.keys(o.data).length + " مسار؟\n\n" + names + "\n\nالمسارات الأخرى الموجودة لا تتغير.")) return;
+      await fbD.collection("content").doc("jobs").set({ data: merged, updatedAt: Date.now() });
+      delete have["content/jobs"];
+      try { await load(fbA.currentUser); } catch (e) {}
+      say("تم رفع المسارات ✅");
+    } catch (e) { alert("فشل الرفع: " + (e && e.message || e)); }
+  }
+  function pickTracksFile() {
+    var inp = document.createElement("input");
+    inp.type = "file"; inp.accept = ".json,application/json";
+    inp.onchange = function () {
+      var f = inp.files && inp.files[0]; if (!f) return;
+      var r = new FileReader();
+      r.onload = function () { importTracks(String(r.result || "")); };
+      r.readAsText(f);
+    };
+    inp.click();
+  }
   function adminUi(user) {
     var isAdm = user && (user.email || "").toLowerCase() === ADMIN;
     if (!isAdm || !window.__spAdminMenu) return;
     window.__spAdminMenu.add("vault-upload", "☁️ رفع الدروس", upload);
+    window.__spAdminMenu.add("vault-tracks", "📥 رفع ملف المسارات", pickTracksFile);
     window.__spAdminMenu.add("vault-gf", "🛡️ تثبيت الحسابات القديمة", grandfather);
   }
   fbA.onAuthStateChanged(adminUi);
-  window.__spVault = { collect: collect, wipe: wipe, apply: apply };
+  window.__spVault = { collect: collect, wipe: wipe, apply: apply, checkTracksFile: checkTracksFile, mergeJobs: mergeJobs, importTracks: importTracks };
 })();

@@ -185,31 +185,31 @@ load();var sc=document.createElement("script");sc.src="chat-scripts.js";sc.onloa
   try { fbA = fbAuth; fbD = fbDb; } catch (e) { return; }
   if (!fbA || !fbD) return;
 
-  // One small admin toggle (never over the bottom nav). Buttons from paywall.js and vault.js live in its panel.
+  // Admin buttons live in the profile screen (in the page flow, never floating over content). Buttons from paywall.js and vault.js are added here.
   window.__spAdminMenu = window.__spAdminMenu || (function () {
-    var fab = null, panel = null;
+    var box = null;
     function build() {
-      if (fab) return;
-      fab = document.createElement("button");
-      fab.textContent = "⚙️";
-      fab.setAttribute("aria-label", "admin");
-      fab.style.cssText = "position:fixed;left:8px;bottom:calc(env(safe-area-inset-bottom,0px) + 100px);z-index:2147482000;width:34px;height:34px;border-radius:50%;border:1px solid #d4af37;background:#1e293b;color:#fde68a;font-size:16px;line-height:1;padding:0;cursor:pointer;opacity:0.85;";
-      panel = document.createElement("div");
-      panel.style.cssText = "position:fixed;left:8px;bottom:calc(env(safe-area-inset-bottom,0px) + 140px);z-index:2147482000;display:none;flex-direction:column;gap:6px;";
-      fab.onclick = function () { panel.style.display = panel.style.display === "none" ? "flex" : "none"; };
-      document.body.appendChild(panel); document.body.appendChild(fab);
+      if (box && box.isConnected) return true;
+      var host = document.getElementById("sc-profile");
+      if (!host) return false;
+      box = document.createElement("div");
+      box.id = "sp-admin-box";
+      box.style.cssText = "display:flex;flex-wrap:wrap;gap:8px;margin:0 0 12px;";
+      var anchor = document.getElementById("open-admin-prof");
+      if (anchor && anchor.parentNode) anchor.parentNode.insertBefore(box, anchor.nextSibling); else host.appendChild(box);
+      return true;
     }
     return {
       add: function (id, label, fn) {
-        build();
-        if (panel.querySelector('[data-id="' + id + '"]')) return;
+        if (!build()) return;
+        if (box.querySelector('[data-id="' + id + '"]')) return;
         var b = document.createElement("button");
         b.setAttribute("data-id", id); b.textContent = label;
         b.className = "sp-am";
-        b.onclick = function () { panel.style.display = "none"; fn(); };
-        panel.appendChild(b);
+        b.onclick = function () { fn(); };
+        box.appendChild(b);
       },
-      clear: function () { if (fab) { fab.remove(); panel.remove(); fab = null; panel = null; } }
+      clear: function () { if (box) { box.remove(); box = null; } }
     };
   })();
 
