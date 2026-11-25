@@ -318,8 +318,8 @@ load();var sc=document.createElement("script");sc.src="chat-scripts.js";sc.onloa
 
   function showPill(leftMs, label) {
     if (pillEl) pillEl.remove();
-    pillEl = el("div", "position:fixed;bottom:8px;right:8px;z-index:2147482000;background:#111a2e;border:1px solid #d4af37;color:#fde68a;border-radius:20px;padding:5px 12px;font-size:0.78rem;direction:rtl;font-family:system-ui", "");
-    document.body.appendChild(pillEl);
+    pillEl = el("div", "text-align:center;background:#111a2e;border-bottom:1px solid #d4af37;color:#fde68a;padding:3px 8px;font-size:0.72rem;direction:rtl;font-family:system-ui;line-height:1.5", "");
+    document.body.insertBefore(pillEl, document.body.firstChild);
     function tick() {
       leftMs -= 1000;
       if (leftMs <= 0) { evaluate(fbA.currentUser); return; }
