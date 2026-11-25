@@ -412,7 +412,7 @@ body.light .n-btn.active { color: var(--gold-dark); }
     <input class="inp" id="au-pass" type="password" dir="ltr" placeholder="كلمة المرور (6 أحرف فأكثر)">
 
     <button type="button" id="au-forgot" style="display:none; background:none; border:0; color:var(--gold-light,#f4d77b); font:inherit; font-size:0.78rem; margin:0 0 8px; padding:4px 0; cursor:pointer; text-decoration:underline;">نسيت كلمة المرور؟</button>
-    <div id="signup-notice" style="font-size:0.76rem; color:#cbd5e1; background:#0e121b; border:1px solid #3b3320; border-radius:12px; padding:8px 11px; margin:2px 0 8px; line-height:1.7; text-align:center;">🎁 ساعة مجانية على مستوى A1. بتبدأ لما تفعّل بريدك الإلكتروني، فاكتب بريدك صح.</div>
+    <div id="signup-notice" style="font-size:0.76rem; color:#cbd5e1; background:#0e121b; border:1px solid #3b3320; border-radius:12px; padding:8px 11px; margin:2px 0 8px; line-height:1.7; text-align:center;">🎁 ١٢ ساعة مجانية على مستوى A1 (أول ١٠ دروس). بتبدأ لما تفعّل بريدك الإلكتروني، فاكتب بريدك صح.</div>
     <button class="btn-gold" id="au-submit" style="margin-top:4px;">إنشاء الحساب والبدء 🚀</button>
     <p style="text-align:center; font-size:0.7rem; color:#64748b; margin-top:12px;">تطوير وإشراف: عبدالرحمن نتعي عبدالرحمن</p>
   </div>
@@ -1275,6 +1275,7 @@ function renderPath() {
     btn.className = "lvl-btn" + (state.currentLevel === lvl ? " active" : "") + (!unlocked ? " locked" : "");
     btn.innerHTML = `<strong>${lvl}${unlocked ? "" : " 🔒"}</strong><small>${LEVEL_META[lvl].target} كلمة</small>`;
     btn.onclick = () => {
+      if (capped && window.__spTrialLock) return window.__spTrialLock();
       if (!unlocked) return toast("اجتز الاختبار الكبير للمستوى السابق أو أعد اختبار تحديد المستوى");
       state.currentLevel = lvl; saveState(); renderPath();
     };
@@ -1305,18 +1306,20 @@ function renderPath() {
     const key = `${lvl}_${i}`;
     const passedScore = state.passedLessons[key];
     const unlocked = state.freeBrowse || i === 0 || !!state.passedLessons[`${lvl}_${i - 1}`];
+    const trialCap = window.__spTrialLessons > 0 && lvl === "A1" ? window.__spTrialLessons : 0;
+    const capped = trialCap > 0 && i >= trialCap;
 
     const row = document.createElement("div");
     row.className = "path-node-row " + aligns[i % aligns.length];
     const node = document.createElement("div");
-    node.className = "lesson-node" + (passedScore ? " passed" : (unlocked ? " current" : " locked"));
+    node.className = "lesson-node" + (capped ? " locked" : (passedScore ? " passed" : (unlocked ? " current" : " locked")));
     node.innerHTML = `
-      <div class="node-circle">${passedScore ? "✓" : (unlocked ? i + 1 : "🔒")}</div>
+      <div class="node-circle">${capped ? "🔒" : (passedScore ? "✓" : (unlocked ? i + 1 : "🔒"))}</div>
       <div class="node-txt">
         <h3>الدرس ${i + 1} (${lvl})</h3>
         <p>الكلمات ${start + 1} – ${start + slice.length} • دراسة + استماع + اختبار</p>
       </div>
-      <span class="node-badge">${passedScore ? passedScore + "%" : (unlocked ? "ابدأ" : "مغلق")}</span>
+      <span class="node-badge">${capped ? "للمشتركين" : (passedScore ? passedScore + "%" : (unlocked ? "ابدأ" : "مغلق"))}</span>
     `;
     node.onclick = () => {
       if (!unlocked) return toast("اجتز اختبار الدرس السابق بنسبة 70% فأكثر");
@@ -1327,7 +1330,7 @@ function renderPath() {
   }
 
   const allDone = totalLessons > 0 && Array.from({ length: totalLessons }, (_, i) => !!state.passedLessons[`${lvl}_${i}`]).every(Boolean);
-  const examUnlocked = (state.freeBrowse || allDone) && words.length >= 4;
+  const examUnlocked = (state.freeBrowse || allDone) && words.length >= 4 && !(window.__spTrialLessons > 0 && lvl === "A1");
   const examPassed = state.passedExams[lvl];
   document.getElementById("ge-title").innerText = `🏆 الاختبار الكبير لنهاية المستوى ${lvl}`;
   document.getElementById("ge-desc").innerText = examPassed
