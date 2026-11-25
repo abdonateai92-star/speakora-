@@ -411,6 +411,8 @@ body.light .n-btn.active { color: var(--gold-dark); }
     <input class="inp" id="au-email" type="email" dir="ltr" placeholder="البريد الإلكتروني (مثال: name@gmail.com)">
     <input class="inp" id="au-pass" type="password" dir="ltr" placeholder="كلمة المرور (6 أحرف فأكثر)">
 
+    <button type="button" id="au-forgot" style="display:none; background:none; border:0; color:var(--gold-light,#f4d77b); font:inherit; font-size:0.78rem; margin:0 0 8px; padding:4px 0; cursor:pointer; text-decoration:underline;">نسيت كلمة المرور؟</button>
+    <div id="signup-notice" style="font-size:0.76rem; color:#cbd5e1; background:#0e121b; border:1px solid #3b3320; border-radius:12px; padding:8px 11px; margin:2px 0 8px; line-height:1.7; text-align:center;">🎁 ساعة مجانية على مستوى A1. بتبدأ لما تفعّل بريدك الإلكتروني، فاكتب بريدك صح.</div>
     <button class="btn-gold" id="au-submit" style="margin-top:4px;">إنشاء الحساب والبدء 🚀</button>
     <p style="text-align:center; font-size:0.7rem; color:#64748b; margin-top:12px;">تطوير وإشراف: عبدالرحمن نتعي عبدالرحمن</p>
   </div>
@@ -1051,8 +1053,38 @@ function setAuthMode(m) {
   document.getElementById("signup-fields").style.display = m === "signup" ? "block" : "none";
   document.getElementById("au-submit").innerText = m === "signup" ? "إنشاء الحساب والبدء 🚀" : "تسجيل الدخول 🔑";
   document.getElementById("auth-err").style.display = "none";
+  document.getElementById("au-forgot").style.display = m === "login" ? "inline-block" : "none";
+  document.getElementById("signup-notice").style.display = m === "signup" ? "block" : "none";
 }
-function showAuthErr(msg) { const e = document.getElementById("auth-err"); e.innerText = msg; e.style.display = "block"; }
+document.getElementById("au-forgot").onclick = handleForgotPassword;
+function showAuthErr(msg, ok) { const e = document.getElementById("auth-err"); e.innerText = msg; e.style.display = "block"; e.style.color = ok ? "#86efac" : ""; e.style.borderColor = ok ? "#166534" : ""; e.style.background = ok ? "#0f2a1a" : ""; }
+function authErrMsg(err) {
+  const c = String((err && err.code) || "");
+  const M = {
+    "auth/invalid-credential": "البريد الإلكتروني أو كلمة المرور غير صحيحة.",
+    "auth/wrong-password": "كلمة المرور غير صحيحة. لو نسيتها اضغط «نسيت كلمة المرور؟».",
+    "auth/user-not-found": "مفيش حساب بالبريد ده. اختر «حساب جديد» لإنشاء حساب.",
+    "auth/invalid-email": "البريد الإلكتروني مكتوب بشكل غير صحيح.",
+    "auth/email-already-in-use": "البريد ده مسجل بالفعل. اختر «تسجيل الدخول».",
+    "auth/weak-password": "كلمة المرور ضعيفة. استخدم 6 أحرف أو أكثر.",
+    "auth/too-many-requests": "محاولات كتير. استنى شوية وحاول تاني.",
+    "auth/network-request-failed": "مشكلة في الإنترنت. تأكد من الاتصال وحاول تاني.",
+    "auth/user-disabled": "الحساب ده موقوف. تواصل معنا على واتساب.",
+    "auth/operation-not-allowed": "التسجيل مش متاح حالياً. حاول بعد شوية.",
+    "auth/missing-password": "اكتب كلمة المرور.",
+    "auth/missing-email": "اكتب البريد الإلكتروني."
+  };
+  return M[c] || "حصلت مشكلة. تأكد من البيانات وحاول مرة تانية.";
+}
+async function handleForgotPassword() {
+  const email = document.getElementById("au-email").value.trim().toLowerCase();
+  if (!(useCloud && fbAuth)) return showAuthErr("لا يوجد اتصال بالسحابة. حدّث الصفحة وحاول مرة أخرى.");
+  if (!email || !email.includes("@")) return showAuthErr("اكتب بريدك الإلكتروني فوق ثم اضغط «نسيت كلمة المرور؟».");
+  try {
+    await fbAuth.sendPasswordResetEmail(email);
+    showAuthErr("لو البريد ده مسجل، هيوصله رابط لتغيير كلمة المرور. شوف مجلد Spam كمان.", true);
+  } catch (err) { showAuthErr(authErrMsg(err)); }
+}
 
 async function handleAuthSubmit() {
   if (!(useCloud && fbAuth)) return showAuthErr("لا يوجد اتصال بالسحابة. حدّث الصفحة وحاول مرة أخرى.");
@@ -1079,7 +1111,7 @@ async function handleAuthSubmit() {
         enterAfterAuth();
       }
     } catch (err) {
-      showAuthErr("خطأ من السحابة: " + (err.message || "تأكد من البيانات"));
+      showAuthErr(authErrMsg(err));
     }
     return;
   }
@@ -1608,16 +1640,24 @@ function finishQuiz() {
     state.placementDone = true; state.placementLevel = determined; state.placementScore = quizCtx.correct;
     state.currentLevel = determined;
     state.unlockedLevels = LEVEL_ORDER.slice(0, idx + 1);
+    // If the account can only open some levels (free trial = A1), start from an open level instead of a locked screen.
+    let clampMsg = "";
+    const openLv = Array.isArray(window.__spAllowed) ? window.__spAllowed : null;
+    if (openLv && openLv.length && openLv.indexOf(determined) < 0) {
+      state.currentLevel = LEVEL_ORDER.find(l => openLv.indexOf(l) >= 0) || "A1";
+      clampMsg = `<p style="color:var(--gold-light); font-size:0.86rem; margin:0 0 12px;">🎁 تجربتك المجانية على مستوى <b>${state.currentLevel}</b>. هنبدأ منه، ومستوى <b>${determined}</b> يتفتح بعد الاشتراك.</p>`;
+    }
     addXp(50); playTone(true);
     document.getElementById("ov-body").innerHTML = `
       <div class="study-card" style="margin-top:20px;">
         <div style="font-size:3.5rem;">🎯</div>
         <h2 style="margin:8px 0;">مستواك الحالي هو: <span style="color:var(--gold-light);">${determined}</span></h2>
         <p style="color:var(--muted); margin-bottom:14px;">أجبت على <b>${quizCtx.correct}</b> من 12 سؤالاً بشكل صحيح. تم فتح المسار حتى مستوى <b>${determined}</b> تلقائياً!</p>
+        ${clampMsg}
         <div class="pill" style="display:inline-flex; padding:8px 18px;">⚡ +50 XP • 🏅 وسام تحديد المستوى</div>
       </div>
     `;
-    const act = document.getElementById("ov-action"); act.disabled = false; act.innerText = `ابدأ التعلم من مستوى ${determined} 🚀`;
+    const act = document.getElementById("ov-action"); act.disabled = false; act.innerText = `ابدأ التعلم من مستوى ${state.currentLevel} 🚀`;
     act.onclick = () => { document.getElementById("overlay").classList.remove("open"); renderAll(); };
     return;
   }

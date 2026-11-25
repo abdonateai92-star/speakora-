@@ -63,6 +63,19 @@
   }
 
   // ---------- loader ----------
+  function deniedBanner(show) {
+    var old = document.getElementById("sp-vault-denied");
+    if (!show) { if (old) old.remove(); return; }
+    if (old) return;
+    var b = el("div", "position:fixed;top:0;left:0;right:0;z-index:2147482500;direction:rtl;background:#1e293b;border-bottom:2px solid #d4af37;color:#fde68a;padding:12px 14px;font:700 0.84rem/1.7 Cairo,system-ui,sans-serif;text-align:center;", "");
+    b.id = "sp-vault-denied";
+    b.appendChild(el("div", "", "🔒 مش قادرين نفتح الدروس لحسابك دلوقتي."));
+    b.appendChild(el("div", "font-weight:500;font-size:0.78rem;margin-bottom:8px;", "افتح من البريد رابط التفعيل لو لسه، أو اعمل تحديث. لو المشكلة مستمرة كلمنا على واتساب."));
+    var r = el("button", "background:#d4af37;color:#090b10;border:0;border-radius:10px;padding:6px 16px;font:inherit;cursor:pointer;", "🔄 حدّث");
+    r.onclick = function () { b.remove(); try { load(fbA.currentUser); } catch (e) { location.reload(); } };
+    b.appendChild(r);
+    document.body.appendChild(b);
+  }
   var wiped = false, have = {}, running = false, rerun = false, lastUid = null;
   async function load(user) {
     if (running) { rerun = true; return; }
@@ -90,6 +103,7 @@
         });
       }));
       if (failed) say("تعذر تحميل بعض الدروس. تأكد من الإنترنت وحدّث الصفحة.");
+      deniedBanner(denied > 0 && Object.keys(have).length === 0 && !document.querySelector(".sp-ov"));
       try { if (typeof renderAll === "function") renderAll(); } catch (e) {}
     } finally {
       running = false;
