@@ -1,0 +1,2900 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <link rel="manifest" href="manifest.json">
+<script>if("serviceWorker" in navigator){window.addEventListener("load",function(){navigator.serviceWorker.register("sw.js").catch(function(){})})}</script>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="theme-color" content="#090b10">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Speakora">
+<title>Speakora — أكاديمية الطلاقة</title>
+<style>
+:root {
+  --bg: #090b10;
+  --bg-soft: #11151f;
+  --card: #151a26;
+  --card-2: #1c2233;
+  --border: rgba(212, 175, 55, 0.22);
+  --border-strong: rgba(212, 175, 55, 0.55);
+  --gold: #d4af37;
+  --gold-light: #f4d77b;
+  --gold-dark: #9e7b1b;
+  --gold-grad: linear-gradient(135deg, #f4d77b 0%, #d4af37 52%, #a8821d 100%);
+  --text: #f8fafc;
+  --muted: #94a3b8;
+  --success: #10b981;
+  --success-bg: rgba(16, 185, 129, 0.16);
+  --danger: #ef4444;
+  --danger-bg: rgba(239, 68, 68, 0.16);
+  --shadow: 0 12px 30px rgba(0, 0, 0, 0.45);
+}
+body.light {
+  --bg: #f6f4ee;
+  --bg-soft: #ede9de;
+  --card: #ffffff;
+  --card-2: #f9f7f1;
+  --border: rgba(168, 130, 29, 0.24);
+  --border-strong: rgba(168, 130, 29, 0.6);
+  --text: #141821;
+  --muted: #64748b;
+  --shadow: 0 10px 26px rgba(20, 24, 33, 0.08);
+}
+* { box-sizing: border-box; margin: 0; padding: 0; font-family: system-ui, -apple-system, 'Segoe UI', Tahoma, sans-serif; -webkit-tap-highlight-color: transparent; }
+body { background: var(--bg); color: var(--text); min-height: 100vh; padding-bottom: 86px; transition: background 0.25s, color 0.25s; }
+button, input, select { font-family: inherit; }
+
+/* شاشة تسجيل الدخول والتسجيل */
+.gate {
+  position: fixed; inset: 0; z-index: 120; background: radial-gradient(circle at top, #1a2033 0%, #090b10 68%);
+  display: none; align-items: center; justify-content: center; padding: 18px; overflow-y: auto;
+}
+.gate.open { display: flex; }
+.gate-card {
+  width: 100%; max-width: 430px; background: rgba(21, 26, 38, 0.96);
+  border: 1.5px solid var(--border-strong); border-radius: 24px; padding: 24px 20px;
+  color: #f8fafc; box-shadow: 0 20px 50px rgba(0,0,0,0.65); margin: auto;
+}
+.gate-logo { text-align: center; margin-bottom: 16px; }
+.gate-logo h1 { font-size: 1.7rem; font-weight: 900; background: var(--gold-grad); -webkit-background-clip: text; -webkit-text-fill-color: transparent; margin-top: 6px; }
+.gate-logo p { font-size: 0.82rem; color: #94a3b8; margin-top: 3px; }
+.mode-pill {
+  display: inline-flex; align-items: center; gap: 6px; font-size: 0.72rem; font-weight: 800;
+  padding: 4px 11px; border-radius: 20px; margin-top: 8px;
+  background: rgba(212, 175, 55, 0.14); color: var(--gold-light); border: 1px solid var(--border-strong);
+}
+.avatar-row { display: flex; justify-content: center; gap: 8px; margin-bottom: 12px; flex-wrap: wrap; }
+.av-opt {
+  width: 40px; height: 40px; border-radius: 50%; border: 2px solid var(--border);
+  background: #11151f; font-size: 1.25rem; cursor: pointer; display: flex; align-items: center; justify-content: center;
+}
+.av-opt.active { border-color: var(--gold); background: rgba(212, 175, 55, 0.22); transform: scale(1.08); }
+.auth-err { color: #fca5a5; background: rgba(239,68,68,0.16); border: 1px solid #ef4444; padding: 8px 12px; border-radius: 10px; font-size: 0.8rem; margin-bottom: 10px; display: none; }
+
+/* الهيدر */
+header {
+  position: sticky; top: 0; z-index: 30;
+  background: rgba(9, 11, 16, 0.92); backdrop-filter: blur(12px);
+  border-bottom: 1px solid var(--border);
+  padding: 11px 14px; display: flex; justify-content: space-between; align-items: center; gap: 8px;
+}
+body.light header { background: rgba(255, 255, 255, 0.94); }
+.brand { display: flex; align-items: center; gap: 9px; min-width: 0; }
+.brand-name { font-size: 1.15rem; font-weight: 900; background: var(--gold-grad); -webkit-background-clip: text; -webkit-text-fill-color: transparent; display: block; line-height: 1.1; }
+.brand-sub { font-size: 0.68rem; color: var(--muted); display: block; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 130px; }
+.hdr-right { display: flex; align-items: center; gap: 6px; }
+.pill {
+  background: var(--card-2); border: 1px solid var(--border);
+  padding: 4px 9px; border-radius: 20px; font-size: 0.78rem; font-weight: 800;
+  display: flex; align-items: center; gap: 3px; color: var(--gold-light);
+}
+body.light .pill { color: var(--gold-dark); }
+.icon-btn {
+  width: 34px; height: 34px; border-radius: 50%; border: 1px solid var(--border);
+  background: var(--card-2); color: var(--text); cursor: pointer; font-size: 0.92rem;
+  display: flex; align-items: center; justify-content: center; flex-shrink: 0;
+}
+.icon-btn.gold-ring { border-color: var(--gold); color: var(--gold-light); }
+
+/* الحاوية والشاشات */
+.wrap { max-width: 540px; margin: 0 auto; padding: 14px; }
+.screen { display: none; animation: fadeUp 0.22s ease; }
+.screen.active { display: block; }
+@keyframes fadeUp { from { opacity: 0; transform: translateY(7px); } to { opacity: 1; transform: translateY(0); } }
+
+/* بطاقة كلمة اليوم والأزرار السريعة */
+.wotd-card {
+  background: linear-gradient(135deg, rgba(212, 175, 55, 0.14), var(--card));
+  border: 1px solid var(--border-strong); border-radius: 18px; padding: 14px 16px; margin-bottom: 12px;
+}
+.quick-actions { display: grid; grid-template-columns: 1fr 1fr; gap: 9px; margin-bottom: 14px; }
+.qa-btn {
+  background: var(--card); border: 1px solid var(--border-strong); border-radius: 15px;
+  padding: 11px 10px; color: var(--text); cursor: pointer; text-align: right;
+  display: flex; align-items: center; gap: 9px; transition: transform 0.15s;
+}
+.qa-btn:active { transform: scale(0.98); }
+.qa-ico { width: 36px; height: 36px; border-radius: 11px; background: rgba(212,175,55,0.16); display: flex; align-items: center; justify-content: center; font-size: 1.15rem; flex-shrink: 0; }
+.qa-btn strong { display: block; font-size: 0.84rem; color: var(--gold-light); }
+body.light .qa-btn strong { color: var(--gold-dark); }
+.qa-btn small { font-size: 0.7rem; color: var(--muted); }
+
+/* الهدف اليومي والمستويات */
+.goal-strip {
+  background: var(--card); border: 1px solid var(--border); border-radius: 16px;
+  padding: 11px 14px; margin-bottom: 12px;
+}
+.goal-top { display: flex; justify-content: space-between; font-size: 0.78rem; font-weight: 800; margin-bottom: 6px; }
+.bar-bg { height: 7px; background: var(--bg-soft); border-radius: 10px; overflow: hidden; }
+.bar-fill { height: 100%; background: var(--gold-grad); width: 0%; transition: width 0.4s ease; }
+
+.lvl-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; margin-bottom: 14px; }
+.lvl-btn {
+  background: var(--card); border: 1px solid var(--border); border-radius: 14px;
+  padding: 10px 4px; text-align: center; cursor: pointer; transition: 0.2s;
+}
+.lvl-btn strong { display: block; font-size: 1rem; color: var(--text); }
+.lvl-btn small { font-size: 0.67rem; color: var(--muted); display: block; margin-top: 2px; }
+.lvl-btn.active { background: var(--gold-grad); border-color: transparent; box-shadow: 0 6px 18px rgba(212, 175, 55, 0.35); }
+.lvl-btn.active strong, .lvl-btn.active small { color: #090b10; font-weight: 800; }
+.lvl-btn.locked { opacity: 0.52; }
+
+/* بطاقة المستوى */
+.hero {
+  background: linear-gradient(145deg, #1a1f2e 0%, #0d1018 100%);
+  border: 1px solid var(--border-strong); border-radius: 22px; padding: 18px;
+  margin-bottom: 16px; position: relative; overflow: hidden; box-shadow: var(--shadow); color: #fff;
+}
+.hero-tag {
+  display: inline-block; background: rgba(212, 175, 55, 0.16); color: var(--gold-light);
+  border: 1px solid var(--border-strong); padding: 3px 10px; border-radius: 20px;
+  font-size: 0.72rem; font-weight: 800; margin-bottom: 7px;
+}
+.hero h2 { font-size: 1.2rem; margin-bottom: 4px; }
+.hero p { font-size: 0.82rem; color: #cbd5e1; margin-bottom: 12px; line-height: 1.5; }
+.hero-meta { display: flex; justify-content: space-between; font-size: 0.76rem; color: var(--gold-light); font-weight: 700; margin-bottom: 6px; }
+
+/* مسار الدروس المتعرج */
+.path-wrap { display: flex; flex-direction: column; align-items: center; gap: 13px; padding: 6px 0 16px; }
+.path-node-row { width: 100%; display: flex; justify-content: center; }
+.path-node-row.left { justify-content: flex-start; padding-right: 12%; }
+.path-node-row.right { justify-content: flex-end; padding-left: 12%; }
+.lesson-node {
+  width: 86%; max-width: 350px; background: var(--card); border: 1px solid var(--border);
+  border-radius: 19px; padding: 13px 15px; display: flex; align-items: center; justify-content: space-between;
+  gap: 11px; cursor: pointer; transition: transform 0.15s; box-shadow: var(--shadow);
+}
+.lesson-node:active { transform: scale(0.98); }
+.lesson-node.passed { border-color: var(--success); }
+.lesson-node.current { border-color: var(--gold); box-shadow: 0 0 0 1px var(--gold), var(--shadow); }
+.lesson-node.locked { opacity: 0.46; cursor: not-allowed; }
+.node-circle {
+  width: 46px; height: 46px; border-radius: 50%; flex-shrink: 0;
+  background: var(--card-2); border: 2px solid var(--border-strong);
+  display: flex; align-items: center; justify-content: center; font-weight: 900; font-size: 1rem; color: var(--gold-light);
+}
+.lesson-node.passed .node-circle { background: var(--success-bg); border-color: var(--success); color: var(--success); }
+.lesson-node.current .node-circle { background: var(--gold-grad); border-color: transparent; color: #090b10; }
+.node-txt { flex: 1; }
+.node-txt h3 { font-size: 0.94rem; margin-bottom: 2px; }
+.node-txt p { font-size: 0.74rem; color: var(--muted); }
+.node-badge { font-size: 0.72rem; font-weight: 800; padding: 5px 9px; border-radius: 11px; background: var(--card-2); color: var(--gold-light); border: 1px solid var(--border); white-space: nowrap; }
+body.light .node-badge { color: var(--gold-dark); }
+.lesson-node.passed .node-badge { background: var(--success-bg); color: var(--success); border-color: transparent; }
+
+.grand-exam-card {
+  background: linear-gradient(135deg, rgba(212, 175, 55, 0.18), rgba(21, 26, 38, 0.96));
+  border: 2px solid var(--gold); border-radius: 22px; padding: 18px; text-align: center; margin-top: 6px;
+}
+body.light .grand-exam-card { background: linear-gradient(135deg, #fff9e6, #ffffff); }
+.grand-exam-card h3 { font-size: 1.08rem; color: var(--gold-light); margin-bottom: 6px; }
+body.light .grand-exam-card h3 { color: var(--gold-dark); }
+.grand-exam-card p { font-size: 0.8rem; color: var(--muted); margin-bottom: 13px; line-height: 1.5; }
+
+/* الأزرار والعناصر المشتركة */
+.btn-gold {
+  width: 100%; padding: 12px 15px; border: none; border-radius: 14px;
+  background: var(--gold-grad); color: #090b10; font-size: 0.95rem; font-weight: 900;
+  cursor: pointer; transition: transform 0.15s; box-shadow: 0 6px 16px rgba(212, 175, 55, 0.24);
+}
+.btn-gold:active { transform: scale(0.98); }
+.btn-gold:disabled { opacity: 0.42; cursor: not-allowed; }
+.btn-outline {
+  width: 100%; padding: 11px 14px; border-radius: 14px; border: 1px solid var(--border-strong);
+  background: transparent; color: var(--gold-light); font-size: 0.88rem; font-weight: 800; cursor: pointer;
+}
+body.light .btn-outline { color: var(--gold-dark); }
+.btn-outline.active-play { background: var(--success-bg); border-color: var(--success); color: var(--success); }
+
+.sub-tabs { display: flex; gap: 6px; background: var(--card); padding: 5px; border-radius: 16px; border: 1px solid var(--border); margin-bottom: 13px; }
+.sub-tab { flex: 1; padding: 8px 6px; border: none; border-radius: 11px; background: transparent; color: var(--muted); font-weight: 800; font-size: 0.8rem; cursor: pointer; }
+.sub-tab.active { background: var(--gold-grad); color: #090b10; }
+.chips { display: flex; gap: 7px; overflow-x: auto; padding-bottom: 7px; margin-bottom: 9px; scrollbar-width: none; }
+.chips::-webkit-scrollbar { display: none; }
+.chip {
+  padding: 6px 12px; border-radius: 20px; border: 1px solid var(--border); background: var(--card);
+  color: var(--muted); font-size: 0.78rem; font-weight: 700; cursor: pointer; white-space: nowrap;
+}
+.chip.active { background: var(--gold-grad); color: #090b10; border-color: transparent; }
+
+.card {
+  background: var(--card); border: 1px solid var(--border); border-radius: 18px;
+  padding: 15px; margin-bottom: 11px; box-shadow: var(--shadow);
+}
+.en-row { display: flex; justify-content: space-between; align-items: flex-start; gap: 9px; direction: ltr; margin-bottom: 7px; }
+.en-txt { font-size: 1.04rem; font-weight: 800; color: var(--gold-light); text-align: left; line-height: 1.4; }
+body.light .en-txt { color: #8c6914; }
+.ar-txt { font-size: 0.94rem; font-weight: 700; margin-bottom: 5px; line-height: 1.45; }
+.ph-tag {
+  display: inline-block; font-size: 0.74rem; color: var(--gold-light); background: rgba(212, 175, 55, 0.12);
+  padding: 2px 9px; border-radius: 8px; margin-bottom: 5px;
+}
+body.light .ph-tag { color: var(--gold-dark); }
+.ex-txt { font-size: 0.8rem; color: var(--muted); direction: ltr; text-align: left; border-top: 1px dashed var(--border); padding-top: 7px; margin-top: 4px; }
+.mini-actions { display: flex; gap: 6px; flex-shrink: 0; }
+.mini-btn {
+  width: 33px; height: 33px; border-radius: 50%; border: 1px solid var(--border);
+  background: var(--card-2); color: var(--text); cursor: pointer; font-size: 0.88rem;
+  display: flex; align-items: center; justify-content: center;
+}
+.mini-btn:active { transform: scale(0.9); }
+
+/* المحادثات ومدرب النطق */
+.chat-box { display: flex; flex-direction: column; gap: 9px; margin-bottom: 12px; }
+.bubble { max-width: 90%; padding: 11px 13px; border-radius: 16px; line-height: 1.45; border: 1px solid var(--border); }
+.bubble.bot { align-self: flex-end; background: var(--card-2); border-bottom-left-radius: 4px; direction: ltr; text-align: left; }
+.bubble.user { align-self: flex-start; background: rgba(212, 175, 55, 0.16); border-color: var(--border-strong); border-bottom-right-radius: 4px; direction: ltr; text-align: left; }
+.bubble-ar { font-size: 0.78rem; color: var(--muted); direction: rtl; text-align: right; margin-top: 5px; border-top: 1px dashed var(--border); padding-top: 5px; display: none; }
+.bubble.show-ar .bubble-ar { display: block; }
+.reply-opts { display: flex; flex-direction: column; gap: 8px; }
+.reply-btn {
+  background: var(--card); border: 1px solid var(--border-strong); color: var(--text);
+  padding: 11px 13px; border-radius: 13px; text-align: left; direction: ltr; font-weight: 700; cursor: pointer; font-size: 0.9rem;
+}
+.reply-btn small { display: block; direction: rtl; text-align: right; color: var(--muted); font-weight: 600; margin-top: 3px; }
+
+.mic-btn {
+  width: 74px; height: 74px; border-radius: 50%; border: 2px solid var(--gold-light);
+  background: var(--gold-grad); color: #090b10; font-size: 1.9rem; cursor: pointer;
+  margin: 12px auto; display: flex; align-items: center; justify-content: center;
+  box-shadow: 0 8px 24px rgba(212, 175, 55, 0.35);
+}
+.mic-btn.listening { background: var(--danger); color: #fff; border-color: #fca5a5; animation: pulse 1.1s infinite; }
+@keyframes pulse { 0% { box-shadow: 0 0 0 0 rgba(239,68,68,0.65); } 70% { box-shadow: 0 0 0 18px rgba(239,68,68,0); } 100% { box-shadow: 0 0 0 0 rgba(239,68,68,0); } }
+
+/* الإدخال والأوسمة والإحصائيات */
+.inp {
+  width: 100%; padding: 11px 13px; border-radius: 12px; border: 1px solid var(--border);
+  background: var(--bg-soft); color: var(--text); font-size: 0.9rem; margin-bottom: 9px; outline: none;
+}
+.inp:focus { border-color: var(--gold); }
+.stats-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 9px; margin-bottom: 13px; }
+.stat-box { background: var(--card); border: 1px solid var(--border); border-radius: 15px; padding: 13px; text-align: center; }
+.stat-num { font-size: 1.35rem; font-weight: 900; color: var(--gold-light); }
+body.light .stat-num { color: var(--gold-dark); }
+.stat-lbl { font-size: 0.74rem; color: var(--muted); margin-top: 2px; }
+
+.badges-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; }
+.badge-tile {
+  background: var(--card-2); border: 1px solid var(--border); border-radius: 14px;
+  padding: 10px 4px; text-align: center; opacity: 0.36; filter: grayscale(1);
+}
+.badge-tile.unlocked { opacity: 1; filter: none; border-color: var(--gold); background: rgba(212, 175, 55, 0.12); }
+.badge-tile .b-ico { font-size: 1.45rem; display: block; margin-bottom: 3px; }
+.badge-tile span { font-size: 0.65rem; font-weight: 800; display: block; line-height: 1.25; }
+
+.dev-card {
+  background: linear-gradient(145deg, #181d2b, #0e1119); border: 1px solid var(--border-strong);
+  border-radius: 20px; padding: 16px; color: #fff; margin-top: 13px;
+}
+.dev-card h3 { color: var(--gold-light); font-size: 1rem; margin-bottom: 3px; }
+.dev-links { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-top: 11px; }
+.dev-link {
+  display: flex; align-items: center; justify-content: center; gap: 5px;
+  padding: 9px; border-radius: 11px; text-decoration: none; font-size: 0.78rem; font-weight: 800;
+  background: rgba(212, 175, 55, 0.14); color: var(--gold-light); border: 1px solid var(--border-strong);
+}
+.dev-link.full { grid-column: span 2; }
+
+/* النوافذ الكاملة (الدراسة / الاختبار / البحث / الأدمن) */
+.overlay { position: fixed; inset: 0; background: var(--bg); z-index: 80; display: none; flex-direction: column; }
+.overlay.open { display: flex; }
+.ov-top { background: var(--card); border-bottom: 1px solid var(--border); padding: 12px 15px; display: flex; align-items: center; gap: 11px; }
+.ov-body { flex: 1; overflow-y: auto; padding: 16px; max-width: 540px; width: 100%; margin: 0 auto; }
+.ov-foot { background: var(--card); border-top: 1px solid var(--border); padding: 13px 15px; }
+.ov-foot-in { max-width: 540px; margin: 0 auto; }
+
+.study-card {
+  background: linear-gradient(160deg, var(--card), var(--card-2));
+  border: 2px solid var(--border-strong); border-radius: 22px; padding: 24px 18px;
+  text-align: center; margin: 8px 0 14px; box-shadow: var(--shadow);
+}
+.study-word { font-size: 1.9rem; font-weight: 900; color: var(--gold-light); direction: ltr; margin-bottom: 7px; }
+body.light .study-word { color: var(--gold-dark); }
+.study-ar { font-size: 1.25rem; font-weight: 800; margin-bottom: 9px; }
+.study-ex { font-size: 0.9rem; color: var(--muted); direction: ltr; margin-top: 12px; padding-top: 12px; border-top: 1px dashed var(--border); }
+
+.q-tag { display: inline-block; background: rgba(212, 175, 55, 0.15); color: var(--gold-light); padding: 4px 11px; border-radius: 20px; font-size: 0.74rem; font-weight: 800; margin-bottom: 9px; }
+body.light .q-tag { color: var(--gold-dark); }
+.q-title { font-size: 1.05rem; font-weight: 800; margin-bottom: 14px; line-height: 1.5; }
+.opt-list { display: flex; flex-direction: column; gap: 9px; }
+.opt-btn {
+  background: var(--card); border: 1.5px solid var(--border); color: var(--text);
+  border-radius: 14px; padding: 13px 15px; font-size: 0.94rem; font-weight: 700;
+  text-align: right; cursor: pointer; transition: 0.15s;
+}
+.opt-btn.ltr { direction: ltr; text-align: left; }
+.opt-btn.selected { border-color: var(--gold); background: rgba(212, 175, 55, 0.14); }
+.opt-btn.ok { border-color: var(--success); background: var(--success-bg); color: var(--success); }
+.opt-btn.err { border-color: var(--danger); background: var(--danger-bg); color: var(--danger); }
+
+.drop-zone { min-height: 64px; background: var(--card); border: 2px dashed var(--border-strong); border-radius: 15px; padding: 11px; display: flex; flex-wrap: wrap; gap: 7px; direction: ltr; margin-bottom: 13px; }
+.word-bank { display: flex; flex-wrap: wrap; gap: 7px; justify-content: center; direction: ltr; }
+.w-pill { background: var(--card-2); border: 1px solid var(--border-strong); color: var(--text); padding: 8px 12px; border-radius: 10px; font-weight: 700; cursor: pointer; }
+.w-pill.used { opacity: 0.24; pointer-events: none; }
+.w-pill.placed { background: var(--gold-grad); color: #090b10; border-color: transparent; }
+.match-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 9px; }
+.match-col { display: flex; flex-direction: column; gap: 8px; }
+.fb-box { padding: 10px 13px; border-radius: 12px; font-size: 0.85rem; font-weight: 800; margin-bottom: 9px; display: none; }
+.fb-box.ok { display: block; background: var(--success-bg); color: var(--success); border: 1px solid var(--success); }
+.fb-box.err { display: block; background: var(--danger-bg); color: var(--danger); border: 1px solid var(--danger); }
+
+/* نافذة الشهادة */
+.cert-modal { position: fixed; inset: 0; background: rgba(0, 0, 0, 0.86); z-index: 130; display: none; align-items: center; justify-content: center; padding: 16px; overflow-y: auto; }
+.cert-modal.open { display: flex; }
+.cert-paper {
+  background: linear-gradient(155deg, #141926 0%, #090b10 100%);
+  border: 3px solid var(--gold); border-radius: 20px; padding: 22px 16px;
+  max-width: 440px; width: 100%; text-align: center; color: #fff;
+  box-shadow: 0 0 0 6px rgba(212, 175, 55, 0.16);
+}
+.cert-inner { border: 1px dashed var(--border-strong); border-radius: 14px; padding: 18px 13px; }
+.cert-title { font-size: 1.3rem; font-weight: 900; background: var(--gold-grad); -webkit-background-clip: text; -webkit-text-fill-color: transparent; margin: 8px 0 5px; }
+.cert-name { font-size: 1.25rem; font-weight: 900; color: #fff; margin: 9px 0; border-bottom: 1px solid var(--border-strong); display: inline-block; padding: 0 14px 5px; }
+
+/* شريط التنقل السفلي */
+nav.bnav {
+  position: fixed; bottom: 0; left: 0; right: 0; z-index: 40;
+  background: rgba(15, 19, 28, 0.97); backdrop-filter: blur(12px);
+  border-top: 1px solid var(--border); display: flex; padding: 7px 0 10px;
+}
+body.light nav.bnav { background: rgba(255, 255, 255, 0.97); }
+.n-btn { flex: 1; background: none; border: none; color: var(--muted); display: flex; flex-direction: column; align-items: center; gap: 3px; font-size: 0.68rem; font-weight: 800; cursor: pointer; }
+.n-btn .ic { font-size: 1.22rem; }
+.n-btn.active { color: var(--gold-light); }
+body.light .n-btn.active { color: var(--gold-dark); }
+
+.toast {
+  position: fixed; bottom: 86px; left: 50%; transform: translateX(-50%);
+  background: var(--gold-grad); color: #090b10; padding: 9px 18px; border-radius: 20px;
+  font-size: 0.82rem; font-weight: 900; z-index: 150; display: none; box-shadow: var(--shadow); white-space: nowrap;
+}
+@media print {
+  body * { visibility: hidden; }
+  .cert-paper, .cert-paper * { visibility: visible; }
+  .cert-paper { position: fixed; inset: 20px; margin: auto; }
+  .no-print { display: none !important; }
+}
+</style>
+</head>
+<body>
+
+<!-- 1. بوابة الحسابات (تسجيل الدخول / حساب جديد) -->
+<div class="gate" id="auth-gate">
+  <div class="gate-card">
+    <div class="gate-logo">
+      <svg width="56" height="56" viewBox="0 0 64 64" fill="none">
+        <defs><linearGradient id="ag1" x1="0" y1="0" x2="64" y2="64"><stop offset="0%" stop-color="#f4d77b"/><stop offset="55%" stop-color="#d4af37"/><stop offset="100%" stop-color="#9e7b1b"/></linearGradient></defs>
+        <rect x="2" y="2" width="60" height="60" rx="16" fill="#121622" stroke="url(#ag1)" stroke-width="3"/>
+        <path d="M20 24C20 19 25 16 32 16C39 16 44 19 44 24C44 29 39 31 32 32C25 33 20 35 20 40C20 45 25 48 32 48C39 48 44 45 44 40" stroke="url(#ag1)" stroke-width="5" stroke-linecap="round"/>
+        <circle cx="48" cy="18" r="4" fill="#f4d77b"/>
+      </svg>
+      <h1>Speakora</h1>
+      <p>منصتك الذكية لإتقان 1000 كلمة من A1 إلى B2</p>
+      <span class="mode-pill" id="cloud-status-pill">⚡ وضع التشغيل المحلي الذكي</span>
+    </div>
+
+    <div class="sub-tabs" style="background:#0e121b;">
+      <button class="sub-tab active" id="auth-tab-signup">حساب جديد</button>
+      <button class="sub-tab" id="auth-tab-login">تسجيل الدخول</button>
+    </div>
+
+    <div class="auth-err" id="auth-err"></div>
+
+    <div id="signup-fields">
+      <p style="font-size:0.76rem; color:#94a3b8; text-align:center; margin-bottom:7px;">اختر صورتك الرمزية:</p>
+      <div class="avatar-row" id="avatar-picker"></div>
+      <input class="inp" id="au-name" placeholder="الاسم الكامل (يظهر على الشهادات)">
+    </div>
+
+    <input class="inp" id="au-email" type="email" dir="ltr" placeholder="البريد الإلكتروني (مثال: name@gmail.com)">
+    <input class="inp" id="au-pass" type="password" dir="ltr" placeholder="كلمة المرور (6 أحرف فأكثر)">
+
+    <button class="btn-gold" id="au-submit" style="margin-top:4px;">إنشاء الحساب والبدء 🚀</button>
+    <p style="text-align:center; font-size:0.7rem; color:#64748b; margin-top:12px;">تطوير وإشراف: عبدالرحمن نتعي عبدالرحمن</p>
+  </div>
+</div>
+
+<!-- 2. بوابة اختبار تحديد المستوى في البداية خالص -->
+<div class="gate" id="placement-gate">
+  <div class="gate-card" style="text-align:center;">
+    <div style="font-size:3rem; margin-bottom:8px;">🎯</div>
+    <span class="hero-tag">الخطوة الأولى قبل البدء</span>
+    <h2 style="font-size:1.3rem; margin-bottom:8px; color:var(--gold-light);">اختبار تحديد المستوى السريع</h2>
+    <p style="font-size:0.86rem; color:#cbd5e1; line-height:1.6; margin-bottom:18px;">
+      أهلاً بك يا <b id="pl-user-name">بطل</b>! أجب عن <b>12 سؤالاً ذكياً</b> متدرجاً من A1 إلى B2 لنحدد مستواك الحقيقي ونفتح لك الدروس المناسبة مباشرة.
+    </p>
+    <div style="display:grid; grid-template-columns:1fr 1fr; gap:8px; margin-bottom:18px; text-align:center;">
+      <div style="background:#11151f; padding:10px; border-radius:12px; border:1px solid var(--border);"><strong style="color:var(--gold-light);">12 سؤال</strong><small style="display:block; color:#94a3b8; font-size:0.72rem;">مفردات وقواعد واستماع</small></div>
+      <div style="background:#11151f; padding:10px; border-radius:12px; border:1px solid var(--border);"><strong style="color:var(--gold-light);">3 دقائق</strong><small style="display:block; color:#94a3b8; font-size:0.72rem;">فتح فوري لمستواك</small></div>
+    </div>
+    <button class="btn-gold" id="pl-start-btn">ابدأ اختبار تحديد المستوى الآن 🎯</button>
+    <button class="btn-outline" id="pl-skip-btn" style="margin-top:10px; font-size:0.82rem;">أنا مبتدئ تماماً — ابدأ من مستوى A1</button>
+  </div>
+</div>
+
+<!-- الهيدر العلوي -->
+<header>
+  <div class="brand">
+    <svg width="34" height="34" viewBox="0 0 64 64" fill="none">
+      <defs><linearGradient id="g1" x1="0" y1="0" x2="64" y2="64"><stop offset="0%" stop-color="#f4d77b"/><stop offset="55%" stop-color="#d4af37"/><stop offset="100%" stop-color="#9e7b1b"/></linearGradient></defs>
+      <rect x="2" y="2" width="60" height="60" rx="16" fill="#121622" stroke="url(#g1)" stroke-width="3"/>
+      <path d="M20 24C20 19 25 16 32 16C39 16 44 19 44 24C44 29 39 31 32 32C25 33 20 35 20 40C20 45 25 48 32 48C39 48 44 45 44 40" stroke="url(#g1)" stroke-width="5" stroke-linecap="round"/>
+      <circle cx="48" cy="18" r="4" fill="#f4d77b"/>
+    </svg>
+    <div>
+      <span class="brand-name">Speakora</span>
+      <span class="brand-sub" id="hdr-user">أهلاً بك</span>
+    </div>
+  </div>
+  <div class="hdr-right">
+    <div class="pill">🔥 <span id="hdr-streak">1</span></div>
+    <div class="pill">⚡ <span id="hdr-xp">0</span></div>
+    <button class="icon-btn" id="open-search-btn" title="بحث فوري">🔍</button>
+    <button class="icon-btn gold-ring" id="open-admin-hdr" style="display:none;" title="لوحة الأدمن">👑</button>
+    <button class="icon-btn" id="theme-btn" title="المظهر">☀️</button>
+  </div>
+</header>
+
+<div class="wrap">
+  <!-- 1. المسار التعليمي -->
+  <section id="sc-path" class="screen active">
+    <div class="wotd-card" id="wotd-card">
+      <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:6px;">
+        <span class="hero-tag" style="margin:0;">✨ كلمة اليوم</span>
+        <span style="font-size:0.72rem; color:var(--muted);" id="wotd-lvl">B1</span>
+      </div>
+      <div class="en-row" style="margin-bottom:4px;">
+        <span class="en-txt" id="wotd-en">Consistency</span>
+        <div class="mini-actions">
+          <button class="mini-btn" id="wotd-say">🔊</button>
+          <button class="mini-btn" id="wotd-save" title="أضف لقاموسي">⭐</button>
+        </div>
+      </div>
+      <div class="ar-txt" id="wotd-ar" style="font-size:0.9rem;">الاستمرارية والثبات</div>
+      <div class="ex-txt" id="wotd-ex" style="margin-top:4px; padding-top:5px;">"Consistency guarantees fluency."</div>
+    </div>
+
+    <div class="quick-actions">
+      <button class="qa-btn" id="btn-speed-60">
+        <div class="qa-ico">⚡</div>
+        <div><strong>تحدي 60 ثانية</strong><small id="speed-best-lbl">أعلى رقم: 0</small></div>
+      </button>
+      <button class="qa-btn" id="btn-retake-placement">
+        <div class="qa-ico">🎯</div>
+        <div><strong>تحديد المستوى</strong><small id="placed-lvl-lbl">مستواك: A1</small></div>
+      </button>
+    </div>
+
+    <div class="goal-strip">
+      <div class="goal-top"><span>🎯 الهدف اليومي</span><span id="goal-txt">0 / 100 XP</span></div>
+      <div class="bar-bg"><div class="bar-fill" id="goal-bar"></div></div>
+    </div>
+
+    <div class="lvl-grid" id="lvl-grid"></div>
+
+    <div class="hero">
+      <span class="hero-tag" id="hero-tag">المستوى A1</span>
+      <h2 id="hero-title">التأسيس السريع</h2>
+      <p id="hero-desc"></p>
+      <div class="hero-meta">
+        <span id="hero-words-meta">0 / 100 كلمة</span>
+        <span id="hero-pct">0%</span>
+      </div>
+      <div class="bar-bg"><div class="bar-fill" id="hero-bar"></div></div>
+    </div>
+
+    <div class="path-wrap" id="path-nodes"></div>
+<button class="btn-gold" id="open-jobs-btn" style="margin-bottom:12px;">💼 مسارات المهن (سائق فندق وغيره)</button>
+    <button class="btn-gold" id="open-stories-btn" style="margin-bottom:12px;">📖 قصص قصيرة</button>
+    <div class="grand-exam-card">
+      <h3 id="ge-title">🏆 الاختبار الكبير لنهاية المستوى A1</h3>
+      <p id="ge-desc"></p>
+      <button class="btn-gold" id="ge-btn">ابدأ الاختبار الكبير</button>
+    </div>
+  </section>
+<!-- مسارات المهن -->
+  <section id="sc-jobs" class="screen">
+    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px;">
+      <strong style="font-size:1rem;">💼 مسارات المهن</strong>
+      <button class="mini-btn" id="jobs-back" style="width:auto; padding:0 12px; border-radius:11px; font-size:0.78rem;">رجوع</button>
+    </div>
+    <div id="jobs-body"></div>
+  </section>
+  <!-- قصص قصيرة -->
+  <section id="sc-stories" class="screen">
+    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px;">
+      <strong style="font-size:1rem;">📖 قصص قصيرة</strong>
+      <button class="mini-btn" id="stories-back" style="width:auto; padding:0 12px; border-radius:11px; font-size:0.78rem;">رجوع</button>
+    </div>
+    <div id="stories-body"></div>
+  </section>
+  <!-- 2. قسم الجمل + وضع المواصلات -->
+  <section id="sc-sentences" class="screen">
+    <div class="card">
+      <div style="display:flex; justify-content:space-between; align-items:center; gap:8px; margin-bottom:10px;">
+        <div>
+          <h3 style="font-size:0.98rem;">💬 مكتبة الجمل والتراكيب</h3>
+          <p style="font-size:0.75rem; color:var(--muted);">استماع تلقائي أو اختبار تركيب جمل</p>
+        </div>
+        <button class="btn-gold" style="width:auto; padding:8px 13px; font-size:0.78rem;" id="sent-quiz-btn">اختبر جمل</button>
+      </div>
+      <button class="btn-outline" id="sent-auto-btn">🎧 تشغيل وضع الاستماع التلقائي (المواصلات)</button>
+    </div>
+    <div class="chips" id="sent-lvl-chips"></div>
+    <div class="chips" id="sent-cat-chips"></div>
+    <div id="sent-list"></div>
+  </section>
+
+  <!-- 3. المحادثات + مدرب النطق + القوالب -->
+  <section id="sc-practice" class="screen">
+    <div class="sub-tabs">
+      <button class="sub-tab active" data-ptab="roleplay">🎭 محادثات</button>
+      <button class="sub-tab" data-ptab="coach">🎤 مدرب النطق</button>
+      <button class="sub-tab" data-ptab="templates">📐 قوالب</button>
+    </div>
+
+    <div id="pane-roleplay">
+      <div class="chips" id="rp-chips"></div>
+      <div class="card">
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:11px;">
+          <strong id="rp-title" style="color:var(--gold-light);">في الكافيه</strong>
+          <button class="mini-btn" style="width:auto; padding:0 10px; border-radius:11px; font-size:0.74rem;" id="rp-reset">إعادة ↻</button>
+        </div>
+        <div class="chat-box" id="rp-chat"></div>
+        <p style="font-size:0.7rem; color:var(--muted); margin-bottom:8px;">اضغط على أي رسالة للترجمة، أو 🔊 لسماعها:</p>
+        <div class="reply-opts" id="rp-opts"></div>
+      </div>
+    </div>
+
+    <div id="pane-coach" style="display:none;">
+      <div class="card" style="text-align:center;">
+        <span class="q-tag">🎤 تقييم النطق الفوري بالمايكروفون</span>
+        <div class="en-txt" id="coach-en" style="text-align:center; font-size:1.2rem; margin:10px 0 6px; direction:ltr;"></div>
+        <div class="ar-txt" id="coach-ar" style="font-size:0.88rem; color:var(--muted); margin-bottom:12px;"></div>
+        <div style="display:flex; justify-content:center; gap:8px; margin-bottom:8px;">
+          <button class="btn-outline" style="width:auto; padding:7px 14px;" id="coach-say">🔊 استمع</button>
+          <button class="btn-outline" style="width:auto; padding:7px 14px;" id="coach-slow">🐢 بطيء</button>
+        </div>
+        <button class="mic-btn" id="coach-mic">🎤</button>
+        <div id="coach-res" style="background:var(--bg-soft); padding:11px; border-radius:12px; font-size:0.84rem; min-height:46px; margin-bottom:12px;">اضغط على المايكروفون وانطق الجملة بالإنجليزية</div>
+        <button class="btn-gold" id="coach-next">الجملة التالية ⬅️</button>
+      </div>
+      <p style="font-size:0.74rem; color:var(--muted); text-align:center; line-height:1.5;">ملاحظة: يعمل المايكروفون بأعلى دقة عبر متصفح Chrome بعد رفع الموقع أونلاين برابط HTTPS.</p>
+    </div>
+
+    <div id="pane-templates" style="display:none;"></div>
+  </section>
+
+  <!-- 4. قاموسي وبنك الأخطاء -->
+  <section id="sc-dict" class="screen">
+    <div class="sub-tabs">
+      <button class="sub-tab active" data-dtab="mywords">⭐ كلماتي الخاصة</button>
+      <button class="sub-tab" data-dtab="mistakes">⚠️ بنك الأخطاء (<span id="mistake-count">0</span>)</button>
+    </div>
+
+    <div id="pane-mywords">
+      <div class="card">
+        <h3 style="font-size:0.94rem; margin-bottom:9px;">أضف كلمة أو جملة جديدة لمذكرتك</h3>
+        <input class="inp" id="cw-en" dir="ltr" placeholder="الكلمة بالإنجليزية (مثال: Hospitality)">
+        <input class="inp" id="cw-ar" placeholder="الترجمة بالعربية (مثال: الضيافة)">
+        <input class="inp" id="cw-ph" placeholder="النطق التقريبي (اختياري)">
+        <div style="display:flex; gap:8px;">
+          <button class="btn-gold" id="cw-add">حفظ في قاموسي +</button>
+          <button class="btn-outline" style="width:auto; white-space:nowrap;" id="cw-quiz">اختبر كلماتي</button>
+        </div>
+      </div>
+      <div id="mywords-list"></div>
+    </div>
+
+    <div id="pane-mistakes" style="display:none;">
+      <div class="card" style="text-align:center;">
+        <p style="font-size:0.82rem; color:var(--muted); margin-bottom:10px;">كل كلمة تخطئ فيها في الاختبارات تُجمع هنا تلقائياً.</p>
+        <button class="btn-gold" id="mistakes-quiz-btn">ابدأ اختبار تصفية الأخطاء</button>
+      </div>
+      <div id="mistakes-list"></div>
+    </div>
+  </section>
+
+  <!-- 5. حسابي والأوسمة والإعدادات والمطور -->
+  <section id="sc-profile" class="screen">
+    <div class="card" id="lb-card">
+  <strong style="font-size:0.95rem;">🏆 لوحة الترتيب</strong>
+  <div id="lb-list" style="margin-top:8px; font-size:0.84rem;">جاري التحميل...</div>
+    </div>
+    <div class="card" style="display:flex; align-items:center; justify-content:space-between; gap:10px;">
+      <div style="display:flex; align-items:center; gap:11px;">
+        <div id="prof-avatar" style="width:48px; height:48px; border-radius:50%; background:var(--card-2); border:2px solid var(--gold); display:flex; align-items:center; justify-content:center; font-size:1.5rem;">🎓</div>
+        <div>
+          <strong id="prof-name-lbl" style="font-size:0.98rem;">المتعلم</strong>
+          <small id="prof-email-lbl" style="display:block; color:var(--muted); font-size:0.74rem;"></small>
+          <small id="prof-sync-lbl" style="display:block; color:var(--gold-light); font-size:0.7rem;"></small>
+        </div>
+      </div>
+      <button class="mini-btn" id="logout-btn" title="تسجيل الخروج" style="width:auto; padding:0 11px; border-radius:11px; font-size:0.74rem; color:#fca5a5;">خروج</button>
+    </div>
+
+    <button class="btn-gold" id="open-admin-prof" style="display:none; margin-bottom:12px;">👑 فتح لوحة تحكم الأدمن (إدارة المستخدمين)</button>
+
+    <div class="stats-grid">
+      <div class="stat-box"><div class="stat-num" id="st-words">0 / 1000</div><div class="stat-lbl">الكلمات المتقنة</div></div>
+      <div class="stat-box"><div class="stat-num" id="st-xp">0</div><div class="stat-lbl">إجمالي النقاط XP</div></div>
+      <div class="stat-box"><div class="stat-num" id="st-speed">0</div><div class="stat-lbl">أعلى رقم (60 ثانية)</div></div>
+      <div class="stat-box"><div class="stat-num" id="st-certs">0 / 4</div><div class="stat-lbl">شهادات المستويات</div></div>
+    </div>
+
+    <button class="btn-outline" id="share-progress-wa" style="margin-bottom:12px;">📲 مشاركة إنجازي في Speakora على واتساب</button>
+
+    <div class="card">
+      <h3 style="font-size:0.94rem; margin-bottom:10px;">🏅 الأوسمة الذهبية</h3>
+      <div class="badges-grid" id="badges-grid"></div>
+    </div>
+
+    <div class="card">
+      <h3 style="font-size:0.94rem; margin-bottom:9px;">📜 شهاداتي</h3>
+      <div id="certs-list" style="display:flex; flex-direction:column; gap:8px;"></div>
+    </div>
+
+    <div class="card">
+      <h3 style="font-size:0.94rem; margin-bottom:10px;">🎙️ إعدادات الصوت واللهجة والحساب</h3>
+      <div style="display:grid; grid-template-columns:1fr 1fr; gap:8px; margin-bottom:9px;">
+        <button class="btn-outline" id="accent-us-btn">🇺🇸 أمريكي</button>
+        <button class="btn-outline" id="accent-gb-btn">🇬🇧 بريطاني</button>
+      </div>
+      <label style="font-size:0.76rem; color:var(--muted); display:block; margin-bottom:5px;">سرعة النطق: <b id="rate-lbl">0.92x</b></label>
+      <input type="range" id="rate-slider" min="0.65" max="1.15" step="0.05" value="0.92" style="width:100%; margin-bottom:11px; accent-color:var(--gold);">
+      <div style="display:flex; flex-direction:column; gap:8px;">
+        <button class="btn-outline" id="toggle-sound-btn">🔊 المؤثرات الصوتية: مفعّلة</button>
+        <button class="btn-outline" id="toggle-free-btn">🔓 التصفح الحر لجميع الدروس: مغلق</button>
+        <button class="btn-outline" id="backup-export-btn">💾 تصدير نسخة احتياطية (Export)</button>
+        <button class="btn-outline" id="backup-import-btn">📂 استعادة نسخة احتياطية (Import)</button>
+        <input type="file" id="import-file-inp" accept=".json" style="display:none;">
+        <button class="btn-outline" style="border-color:var(--danger); color:var(--danger);" id="reset-all-btn">🗑️ إعادة ضبط تقدم هذا الحساب</button>
+      </div>
+    </div>
+
+    <div class="dev-card">
+      <span class="hero-tag">تطوير وإشراف</span>
+      <h3>عبدالرحمن نتعي عبدالرحمن</h3>
+      <p style="font-size:0.78rem; color:#cbd5e1;">مؤسس ومطور منصة Speakora لتعليم اللغة الإنجليزية.</p>
+      <div class="dev-links">
+        <a class="dev-link" href="https://wa.me/966574767428" target="_blank">💬 واتساب السعودية</a>
+        <a class="dev-link" href="tel:0574767428">📞 0574767428</a>
+        <a class="dev-link" href="https://wa.me/201271109660" target="_blank">💬 واتساب مصر</a>
+        <a class="dev-link" href="tel:01271109660">📞 01271109660</a>
+        <a class="dev-link full" href="mailto:Abdonateai92@gmail.com">✉️ Abdonateai92@gmail.com</a>
+      </div>
+      <p style="text-align:center; font-size:0.7rem; color:#94a3b8; margin-top:12px;">© Speakora — جميع الحقوق محفوظة لعبدالرحمن نتعي عبدالرحمن</p>
+    </div>
+  </section>
+</div>
+
+<!-- شاشة الدراسة / الاختبار / التحدي / تحديد المستوى -->
+<div class="overlay" id="overlay">
+  <div class="ov-top">
+    <button class="icon-btn" id="ov-close">✕</button>
+    <div style="flex:1;">
+      <div style="display:flex; justify-content:space-between; font-size:0.76rem; font-weight:800; margin-bottom:5px;">
+        <span id="ov-title">الدرس 1</span>
+        <span id="ov-counter">1 / 10</span>
+      </div>
+      <div class="bar-bg"><div class="bar-fill" id="ov-bar"></div></div>
+    </div>
+  </div>
+  <div class="ov-body" id="ov-body"></div>
+  <div class="ov-foot" id="ov-foot">
+    <div class="ov-foot-in">
+      <div class="fb-box" id="ov-fb"></div>
+      <button class="btn-gold" id="ov-action">متابعة</button>
+    </div>
+  </div>
+</div>
+
+<!-- شاشة البحث الفوري -->
+<div class="overlay" id="search-overlay">
+  <div class="ov-top">
+    <button class="icon-btn" id="search-close">✕</button>
+    <input class="inp" id="global-search-inp" style="margin:0; flex:1;" placeholder="ابحث في 1000 كلمة و80 جملة (عربي أو إنجليزي)...">
+  </div>
+  <div class="ov-body" id="search-results"></div>
+</div>
+
+<!-- لوحة تحكم الأدمن -->
+<div class="overlay" id="admin-overlay">
+  <div class="ov-top">
+    <button class="icon-btn" id="admin-close">✕</button>
+    <strong style="flex:1; color:var(--gold-light);">👑 لوحة تحكم أدمن Speakora</strong>
+    <button class="mini-btn" id="admin-refresh" title="تحديث">↻</button>
+  </div>
+  <div class="ov-body" id="admin-body"></div>
+</div>
+
+<!-- نافذة الشهادة -->
+<div class="cert-modal" id="cert-modal">
+  <div class="cert-paper">
+    <div class="cert-inner">
+      <div style="font-size:2rem;">🏆</div>
+      <div class="cert-title">شهادة إتمام مستوى</div>
+      <p style="font-size:0.76rem; color:#cbd5e1;">تُشهد منصة Speakora بأن المتعلم</p>
+      <div class="cert-name" id="c-name">المتعلم</div>
+      <p style="font-size:0.82rem; color:#e2e8f0; line-height:1.6;" id="c-body"></p>
+      <div style="display:flex; justify-content:space-between; margin-top:16px; padding-top:11px; border-top:1px solid var(--border); font-size:0.72rem; color:var(--gold-light);">
+        <span id="c-date"></span>
+        <span>إشراف: عبدالرحمن نتعي عبدالرحمن</span>
+      </div>
+      <div class="no-print" style="display:flex; flex-direction:column; gap:8px; margin-top:14px;">
+        <div style="display:flex; gap:8px;">
+          <button class="btn-gold" onclick="window.print()">🖨️ حفظ / طباعة</button>
+          <button class="btn-outline" id="cert-share-wa">📲 واتساب</button>
+        </div>
+        <button class="btn-outline" onclick="document.getElementById('cert-modal').classList.remove('open')">إغلاق</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- شريط التنقل السفلي -->
+<nav class="bnav">
+  <button class="n-btn active" data-sc="path"><span class="ic">👑</span><span>المسار</span></button>
+  <button class="n-btn" data-sc="sentences"><span class="ic">💬</span><span>الجمل</span></button>
+  <button class="n-btn" data-sc="practice"><span class="ic">🎭</span><span>تدرّب</span></button>
+  <button class="n-btn" data-sc="dict"><span class="ic">⭐</span><span>قاموسي</span></button>
+  <button class="n-btn" data-sc="profile"><span class="ic">📊</span><span>حسابي</span></button>
+</nav>
+
+<div class="toast" id="toast"></div>
+
+<!-- إعداد PWA المدمج -->
+<script>
+(function setupPWA(){
+  try {
+    const svg = `<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 192 192'><rect width='192' height='192' rx='44' fill='#090b10'/><rect x='8' y='8' width='176' height='176' rx='38' fill='none' stroke='#d4af37' stroke-width='8'/><path d='M60 72C60 57 75 48 96 48C117 48 132 57 132 72C132 87 117 93 96 96C75 99 60 105 60 120C60 135 75 144 96 144C117 144 132 135 132 120' fill='none' stroke='#f4d77b' stroke-width='15' stroke-linecap='round'/><circle cx='144' cy='54' r='12' fill='#f4d77b'/></svg>`;
+    const iconUrl = "data:image/svg+xml;base64," + btoa(svg);
+    const link1 = document.createElement("link"); link1.rel = "apple-touch-icon"; link1.href = iconUrl; document.head.appendChild(link1);
+    const manifest = { name: "Speakora — أكاديمية الطلاقة", short_name: "Speakora", start_url: ".", display: "standalone", background_color: "#090b10", theme_color: "#090b10", icons: [{ src: iconUrl, sizes: "192x192", type: "image/svg+xml" }] };
+    const link2 = document.createElement("link"); link2.rel = "manifest"; link2.href = URL.createObjectURL(new Blob([JSON.stringify(manifest)], { type: "application/manifest+json" })); document.head.appendChild(link2);
+  } catch (e) {}
+})();
+window.SPEAKORA_DATA = { A1:{words:[],sentences:[]}, A2:{words:[],sentences:[]}, B1:{words:[],sentences:[]}, B2:{words:[],sentences:[]} };
+</script>
+
+<!-- Firebase SDK -->
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
+
+<!-- ملفات الـ 1000 كلمة المنفصلة -->
+  <script src="learn-engine.js"></script>
+<script>
+// ================= 1. إعدادات Firebase السحابية =================
+const FIREBASE_CONFIG = {
+  apiKey: "AIzaSyBKmRa3aiAVvwVL5-QoaiQlPx9raywuvEA",
+  authDomain: "speakora-abdo.firebaseapp.com",
+  projectId: "speakora-abdo",
+  storageBucket: "speakora-abdo.firebasestorage.app",
+  messagingSenderId: "621081912669",
+  appId: "1:621081912669:web:a21dd29115ee876a9634b4"
+};
+const ADMIN_EMAIL = "abdonateai92@gmail.com";
+
+let useCloud = false, fbAuth = null, fbDb = null;
+try {
+  if (typeof firebase !== "undefined" && FIREBASE_CONFIG.apiKey && FIREBASE_CONFIG.apiKey !== "PUT_YOUR_API_KEY_HERE") {
+    if (!firebase.apps.length) firebase.initializeApp(FIREBASE_CONFIG);
+    fbAuth = firebase.auth();
+    fbDb = firebase.firestore();
+    useCloud = true;
+  }
+} catch (e) { useCloud = false; }
+
+// ================= 2. البيانات الثابتة واختبار تحديد المستوى =================
+const LEVEL_META = {
+  A1: { name: "التأسيس السريع", target: 1000, desc: "أهم 1000 كلمة وجملة أساسية للحياة اليومية والتعارف." },
+  A2: { name: "التواصل اليومي", target: 1000, desc: "1000 كلمة عملية لإدارة المحادثات اليومية والعمل." },
+  B1: { name: "العمل والاحتراف", target: 1000, desc: "1000 كلمة متوسطة للإشراف والاجتماعات والربط بين الأفكار." },
+  B2: { name: "الطلاقة المتقدمة", target: 1000, desc: "1000 كلمة متقدمة للمقابلات الوظيفية والإدارة بطلاقة." }
+};
+const LEVEL_ORDER = ["A1", "A2", "B1", "B2"];
+const AVATARS = ["🎓", "👑", "🦁", "🚀", "💼", "🌟"];
+
+const PLACEMENT_QUESTIONS = [
+  { lvl: "A1", tag: "مستوى A1 • أساسي", prompt: "اختر الترجمة الصحيحة لجملة: I wake up early every morning.", say: "I wake up early every morning.", options: ["أستيقظ مبكراً كل صباح.", "أنام متأخراً كل ليلة.", "أذهب للعمل بالقطار.", "أشرب الشاي في المساء."], answer: 0 },
+  { lvl: "A1", tag: "مستوى A1 • قواعد", prompt: "أكمل الجملة: She ___ English every day.", options: ["study", "studies", "studying", "studied to"], answer: 1, ltr: true },
+  { lvl: "A1", tag: "مستوى A1 • استماع", prompt: "استمع جيداً واختر معنى الجملة:", say: "How can I help you today?", options: ["أين تقع الغرفة؟", "متى يبدأ الاجتماع؟", "كيف يمكنني مساعدتك اليوم؟", "كم سعر هذه القهوة؟"], answer: 2 },
+  { lvl: "A2", tag: "مستوى A2 • عمل", prompt: "ما معنى كلمة (Available) في جملة: Are you available for a call?", say: "Are you available for a call?", options: ["متأخر", "متاح / متفرغ", "مشغول جداً", "موافق"], answer: 1 },
+  { lvl: "A2", tag: "مستوى A2 • طلب مهذب", prompt: "أكمل الطلب المهذب: ___ you send me the daily report, please?", options: ["Could", "Does", "Are", "Was"], answer: 0, ltr: true },
+  { lvl: "A2", tag: "مستوى A2 • استماع", prompt: "استمع واختر الترجمة الأدق:", say: "Leave your key at the reception desk.", options: ["أغلق الباب قبل النوم.", "اترك مفتاحك في مكتب الاستقبال.", "المصعد في الطابق الثالث.", "لدي حجز لليلتين."], answer: 1 },
+  { lvl: "B1", tag: "مستوى B1 • ربط الجمل", prompt: "اختر أداة الربط الصحيحة: ___ the shift was busy, the team finished on time.", options: ["Because", "Although", "Therefore", "Unless"], answer: 1, ltr: true },
+  { lvl: "B1", tag: "مستوى B1 • إشراف", prompt: "ما معنى الفعل (Inspect) في بيئة العمل؟", say: "Inspect", options: ["يلغي موعداً", "يؤجل العمل", "يفحص ويفتش بدقة", "يستبدل موظفاً"], answer: 2 },
+  { lvl: "B1", tag: "مستوى B1 • مواقف", prompt: "ما أفضل رد مهني على ضيف يشتكي من تأخر الخدمة؟", options: ["I apologize for the delay; I will solve it right away.", "Wait outside please, I am very busy.", "This is not my problem at all.", "Maybe tomorrow it will be fine."], answer: 0, ltr: true },
+  { lvl: "B2", tag: "مستوى B2 • طلاقة", prompt: "اختر أداة الربط المناسبة: He studied consistently; ___, he passed the B2 evaluation.", options: ["whereas", "consequently", "despite", "unless"], answer: 1, ltr: true },
+  { lvl: "B2", tag: "مستوى B2 • مفردات متقدمة", prompt: "ما معنى صفة (Meticulous) في: Housekeeping requires meticulous attention to detail.", say: "Meticulous", options: ["سريع وعشوائي", "مؤقت ومحدود", "شديد الدقة والاهتمام بالتفاصيل", "متردد وغير حاسم"], answer: 2 },
+  { lvl: "B2", tag: "مستوى B2 • تعبيرات احترافية", prompt: "ما معنى التعبير (On the same page) في الاجتماعات؟", say: "Let us stay on the same page.", options: ["قراءة نفس الكتاب فقط", "متفقون وعلى نفس الفهم", "التأخر عن الجدول الزمني", "نفاد المخزون تماماً"], answer: 1 }
+];
+
+const ROLEPLAYS = [
+  { id: "cafe", title: "☕ الكافيه", steps: [
+    { bot: "Good morning! Welcome to Golden Cafe. What can I get for you?", botAr: "صباح الخير! أهلاً بك في كافيه جولدن. ماذا أقدم لك؟", opts: [{ en: "I would like a black coffee, please.", ar: "أود قهوة سوداء، من فضلك." }, { en: "Could I have a cup of hot tea?", ar: "هل يمكنني الحصول على كوب شاي ساخن؟" }] },
+    { bot: "Great choice! Would you like it medium or large?", botAr: "اختيار رائع! هل تريده وسط أم كبير؟", opts: [{ en: "Large, please. And no sugar.", ar: "كبير من فضلك، وبدون سكر." }, { en: "Medium is fine, thank you.", ar: "الوسط مناسب، شكراً لك." }] },
+    { bot: "Sure! Your order will be ready in two minutes.", botAr: "بالتأكيد! طلبك سيكون جاهزاً خلال دقيقتين.", opts: [] }
+  ]},
+  { id: "hotel", title: "🏨 إشراف الفندق", steps: [
+    { bot: "Hello! Are the VIP rooms ready for the afternoon check-in?", botAr: "مرحباً! هل غرف كبار الشخصيات جاهزة لتسجيل الدخول عصراً؟", opts: [{ en: "Yes, I inspected all rooms personally and they are spotless.", ar: "نعم، فحصت كل الغرف بنفسي وهي نظيفة تماماً." }, { en: "Almost ready, we are finishing the final inspection now.", ar: "شبه جاهزة، ننتهي من الفحص النهائي الآن." }] },
+    { bot: "Excellent. Do we need any extra supplies for the evening shift?", botAr: "ممتاز. هل نحتاج أي مستلزمات إضافية لوردية المساء؟", opts: [{ en: "Yes, we need a carton of hand soap and steel polish.", ar: "نعم، نحتاج كرتونة صابون أيدٍ وملمّع ستيل." }, { en: "Everything is fully stocked and ready for the team.", ar: "كل شيء متوفر بالكامل وجاهز للفريق." }] },
+    { bot: "Perfect coordination! Keep up the great leadership.", botAr: "تنسيق مثالي! استمر في هذا الأداء القيادي الرائع.", opts: [] }
+  ]},
+  { id: "interview", title: "💼 مقابلة الترقية", steps: [
+    { bot: "Tell me briefly about your leadership experience.", botAr: "حدثني باختصار عن خبرتك في القيادة.", opts: [{ en: "I lead a team of fifteen staff and ensure high quality daily.", ar: "أقود فريقاً من 15 موظفاً وأضمن جودة عالية يومياً." }, { en: "I have six years of hospitality experience and three certificates.", ar: "لدي ست سنوات خبرة في الضيافة وثلاث شهادات معتمدة." }] },
+    { bot: "Why do you think you are ready for the promotion?", botAr: "لماذا تعتقد أنك جاهز لهذه الترقية؟", opts: [{ en: "I am proactive, organized, and committed to team efficiency.", ar: "أنا مبادر ومنظم وملتزم بكفاءة الفريق." }, { en: "I handle busy shifts calmly and deliver results ahead of schedule.", ar: "أدير الورديات المزدحمة بهدوء وأحقق النتائج قبل الموعد." }] },
+    { bot: "Impressive answers! You have the right mindset for a manager.", botAr: "إجابات مبهرة! لديك العقلية المناسبة لتكون مديراً.", opts: [] }
+  ]},
+  { id: "complaint", title: "🛠️ شكوى ضيف", steps: [
+    { bot: "Excuse me! My room is missing clean towels and the mirror has spots.", botAr: "عفواً! غرفتي ينقصها مناشف نظيفة والمرآة عليها بقع.", opts: [{ en: "I sincerely apologize for the inconvenience; I will fix it right away.", ar: "أعتذر بصدق عن هذا الإزعاج؛ سأصلح الأمر فوراً." }, { en: "Thank you for letting me know; I am sending fresh towels immediately.", ar: "شكراً لإبلاغي؛ سأرسل مناشف نظيفة فوراً." }] },
+    { bot: "How long will that take? I have a meeting in twenty minutes.", botAr: "كم سيستغرق ذلك؟ لدي اجتماع خلال عشرين دقيقة.", opts: [{ en: "It will take five minutes only, and I will inspect it personally.", ar: "سيستغرق خمس دقائق فقط، وسأفحصها بنفسي." }, { en: "Our attendant is on the way right now and will finish promptly.", ar: "الموظف في طريقه الآن وسينتهي فوراً." }] },
+    { bot: "Thank you for your fast and polite response!", botAr: "شكراً لاستجابتك السريعة والمهذبة!", opts: [] }
+  ]},
+  { id: "airport", title: "✈️ المطار والحجز", steps: [
+    { bot: "Good afternoon! May I see your passport and booking confirmation?", botAr: "مساء الخير! هل يمكنني رؤية جواز سفرك وتأكيد الحجز؟", opts: [{ en: "Here you go. Could I request a window seat, please?", ar: "تفضل. هل يمكنني طلب مقعد بجانب النافذة، من فضلك؟" }, { en: "Sure, here is my passport. Is the flight on schedule?", ar: "بالتأكيد، ها هو جوازي. هل الرحلة في موعدها؟" }] },
+    { bot: "Yes, your flight is on time. Boarding starts at gate twelve.", botAr: "نعم، رحلتك في موعدها. الصعود يبدأ من البوابة 12.", opts: [{ en: "Thank you very much. Where is the nearest lounge?", ar: "شكراً جزيلاً. أين أقرب صالة انتظار؟" }, { en: "Great, thank you for your help!", ar: "رائع، شكراً لمساعدتك!" }] },
+    { bot: "Have a safe and pleasant flight!", botAr: "أتمنى لك رحلة آمنة وممتعة!", opts: [] }
+  ]},
+  { id: "meeting", title: "🤝 اجتماع المدير", steps: [
+    { bot: "We have a big wedding event tomorrow night. Are we fully prepared?", botAr: "لدينا حفل زفاف كبير ليلة الغد. هل نحن مستعدون بالكامل؟", opts: [{ en: "Yes, the checklist is updated and all supplies are confirmed.", ar: "نعم، قائمة الفحص محدثة وجميع المستلزمات مؤكدة." }, { en: "Almost done; we just need to polish the main entrance glass.", ar: "شبه منتهٍ؛ نحتاج فقط لتلميع زجاج المدخل الرئيسي." }] },
+    { bot: "Good. Please make sure the evening team arrives thirty minutes early.", botAr: "جيد. يرجى التأكد من وصول فريق المساء قبل الموعد بنصف ساعة.", opts: [{ en: "Understood. I will inform everyone and hold a quick briefing.", ar: "مفهوم. سأبلغ الجميع وأعقد إيجازاً سريعاً." }, { en: "Will do! I will send you a status email once setup is complete.", ar: "سيتم! سأرسل لك إيميل حالة فور اكتمال التجهيز." }] },
+    { bot: "Excellent leadership. Thank you!", botAr: "قيادة ممتازة. شكراً لك!", opts: [] }
+  ]}
+];
+
+const TEMPLATES = [
+  { title: "1. الطلبات المهذبة (Can / Could / Would / May)", rule: "استخدم Could و Would في العمل ومع الضيوف والمديرين لأنها أكثر احترافية ولباقة من Can.", formula: "Could you + [الفعل بالمصدر] + ... please?", examples: [["Could you send me the daily report, please?", "هل يمكنك إرسال التقرير اليومي لي من فضلك؟"], ["Would you like me to inspect the hall again?", "هل تود مني فحص القاعة مرة أخرى؟"], ["May I speak with the manager on duty?", "هل يسمح لي بالتحدث مع المدير المناوب؟"]] },
+  { title: "2. كلمات الربط لمستوى B2", rule: "استبدل التكرار بـ and و but بكلمات ربط احترافية ترفع تقييمك فوراً في التحدث والكتابة.", formula: "Although [جملة 1], [جملة 2]  |  Furthermore / Consequently", examples: [["Although the shift was busy, we finished ahead of schedule.", "رغم ازدحام الوردية، أنهينا العمل قبل الموعد."], ["He practiced daily; consequently, he reached B2 fluency.", "تدرّب يومياً؛ ونتيجة لذلك وصل لطلاقة B2."], ["Furthermore, I hold three certified hospitality courses.", "علاوة على ذلك، أحمل ثلاث دورات ضيافة معتمدة."]] },
+  { title: "3. تكوين الجملة السليمة (SVO)", rule: "ابدأ دائماً بالفاعل ثم الفعل ثم المفعول، وتذكر أن الصفة تسبق الاسم في الإنجليزية.", formula: "Subject (فاعل) + Verb (فعل) + Adjective + Object", examples: [["I manage a dedicated team.", "أنا أدير فريقاً متفانياً."], ["We prepare clean rooms every morning.", "نحن نجهّز غرفاً نظيفة كل صباح."]] },
+  { title: "4. قالب التعريف بنفسك في المقابلات", rule: "تركيبة ذهبية من 3 جمل: خبرتك الحالية + أهم نقاط قوتك + هدفك القادم.", formula: "I have [X] years of experience in... My strength is... My goal is...", examples: [["I have six years of experience in hotel housekeeping.", "لدي ست سنوات خبرة في الإشراف الفندقي."], ["My goal is to become a department manager.", "هدفي هو أن أصبح مدير قسم."]] },
+  { title: "5. المضارع البسيط vs المضارع المستمر", rule: "المضارع البسيط للروتين والعادات اليومية (every day)، والمستمر لما يحدث الآن في هذه اللحظة (right now).", formula: "Simple: I inspect rooms daily.  |  Continuous: I am inspecting room 5 now.", examples: [["I study English for one hour every day.", "أدرس الإنجليزية ساعة كل يوم (عادة)."], ["I am preparing the banquet hall right now.", "أقوم بتجهيز قاعة المناسبات الآن (اللحظة)."]] },
+  { title: "6. الماضي البسيط vs المضارع التام", rule: "استخدم الماضي البسيط لوقت محدد انتهى (yesterday / last year)، والمضارع التام للخبرات والإنجازات المرتبطة بالحاضر.", formula: "Past: I worked in Riyadh in 2023.  |  Perfect: I have worked here for 2 years.", examples: [["I sent the status email ten minutes ago.", "أرسلت إيميل الحالة قبل عشر دقائق."], ["I have completed all A1 and A2 lessons.", "لقد أتممت جميع دروس A1 و A2."]] },
+  { title: "7. التحدث عن المستقبل (Will vs Going to)", rule: "استخدم Going to للخطط المسبقة، و Will للقرارات السريعة والوعود الفورية.", formula: "Plan: I am going to pass B2.  |  Promise: I will fix it right away.", examples: [["I am going to take my English evaluation in April.", "سأخوض تقييم الإنجليزية في أبريل (خطة)."], ["Do not worry, I will check the room immediately.", "لا تقلق، سأفحص الغرفة فوراً (وعد سريع)."]] },
+  { title: "8. قالب الإيميل الرسمي للمدير", rule: "إيميل العمل الاحترافي يتكون من: تحية رسمية + ملخص الحالة في سطرين + خاتمة مهذبة.", formula: "Dear [Name], I am writing to update you that... Best regards, [Your Name]", examples: [["Dear Manager, all VIP rooms have been inspected and are ready.", "عزيزي المدير، تم فحص جميع غرف VIP وهي جاهزة."], ["Please let me know if you need any additional supplies. Best regards.", "يرجى إبلاغي إذا كنت تحتاج أي مستلزمات إضافية. أطيب التحيات."]] }
+];
+
+const BADGES_DEF = [
+  { id: "placed", ico: "🎯", title: "تحديد المستوى", check: s => s.placementDone },
+  { id: "first_l", ico: "🌟", title: "أول درس", check: s => Object.keys(s.passedLessons).length >= 1 },
+  { id: "perfect", ico: "💯", title: "قناص 100%", check: s => Object.values(s.passedLessons).some(v => v >= 100) },
+  { id: "w100", ico: "📚", title: "أول 100 كلمة", check: s => getTotalMastered(s) >= 100 },
+  { id: "speed10", ico: "⚡", title: "بطل السرعة", check: s => (s.speedBest || 0) >= 10 },
+  { id: "rp1", ico: "🎭", title: "متحدث لبق", check: s => (s.roleplaysDone || 0) >= 1 },
+  { id: "streak3", ico: "🔥", title: "مثابرة 3 أيام", check: s => (s.streak || 1) >= 3 },
+  { id: "b2king", ico: "👑", title: "بطل B2", check: s => !!(s.passedExams && s.passedExams.B2) }
+];
+
+const DEMO_A1 = [
+  ["Welcome", "أهلاً بك", "وِيلْكَم", "Welcome to Speakora academy."],
+  ["Schedule", "جدول مواعيد", "سْكِيدْجُوَل", "Check the daily schedule."],
+  ["Routine", "روتين يومي", "رُوتِين", "English is my daily routine."],
+  ["Success", "نجاح", "سَاكْسِيس", "Daily practice leads to success."]
+];
+
+// ================= 3. إدارة المستخدمين والحالة =================
+function createEmptyState(name, email, avatar) {
+  return {
+    name: name || "متعلم Speakora",
+    email: (email || "guest@speakora.local").toLowerCase(),
+    avatar: avatar || "🎓",
+    xp: 0, dailyXp: 0, lastDay: new Date().toDateString(), streak: 1,
+    currentLevel: "A1", unlockedLevels: ["A1"],
+    placementDone: false, placementLevel: "A1", placementScore: 0,
+    passedLessons: {}, passedExams: {}, customWords: [], mistakes: [],
+    speedBest: 0, roleplaysDone: 0, unlockedBadges: [],
+    theme: "dark", sound: true, freeBrowse: false, accent: "en-US", rate: 0.92,
+    updatedAt: new Date().toISOString()
+  };
+}
+
+let currentUid = null;
+let state = createEmptyState();
+let authMode = "signup";
+let pickedAvatar = "🎓";
+
+function getLocalAccounts() { try { return JSON.parse(localStorage.getItem("speakora_accounts_v2") || "{}"); } catch(e){ return {}; } }
+function saveLocalAccounts(obj) { try { localStorage.setItem("speakora_accounts_v2", JSON.stringify(obj)); } catch(e){} }
+
+let syncTimer = null;
+  function flushCloud() {
+  clearTimeout(syncTimer); syncTimer = null;
+  if (!(useCloud && fbDb && currentUid)) return;
+  fbDb.collection("users").doc(currentUid).set(state, { merge: true }).catch(() => {});
+  fbDb.collection("leaderboard").doc(currentUid).set({ name: state.name, avatar: state.avatar || "🎓", xp: state.xp || 0, level: state.currentLevel || "A1", streak: state.streak || 1, updatedAt: state.updatedAt }, { merge: true }).catch(() => {});
+}
+document.addEventListener("visibilitychange", () => { if (document.visibilityState === "hidden" && syncTimer) flushCloud(); });
+window.addEventListener("pagehide", () => { if (syncTimer) flushCloud(); });
+function saveState() {
+  state.updatedAt = new Date().toISOString();
+  checkBadges();
+  if (useCloud && fbDb && currentUid) {
+    clearTimeout(syncTimer);
+    syncTimer = setTimeout(flushCloud, 20000);
+  }
+  const accs = getLocalAccounts();
+  if (state.email) {
+    const existingPass = accs[state.email] ? accs[state.email].pass : "";
+    accs[state.email] = { pass: existingPass, data: state };
+    saveLocalAccounts(accs);
+    try { localStorage.setItem("speakora_session_v2", state.email); } catch(e){}
+  }
+}
+
+function checkBadges() {
+  if (!state.unlockedBadges) state.unlockedBadges = [];
+  BADGES_DEF.forEach(b => {
+    if (!state.unlockedBadges.includes(b.id) && b.check(state)) {
+      state.unlockedBadges.push(b.id);
+      toast(`🏅 وسام جديد: ${b.title}!`);
+    }
+  });
+}
+
+// ================= 4. مساعدات الكلمات والصوت =================
+function normWord(w) { return Array.isArray(w) ? { en:w[0]||"", ar:w[1]||"", ph:w[2]||"", ex:w[3]||"" } : { en:w.en||"", ar:w.ar||"", ph:w.ph||"", ex:w.ex||"" }; }
+function normSent(s, lvl) { return Array.isArray(s) ? { en:s[0]||"", ar:s[1]||"", ph:s[2]||"", cat:s[3]||"يومي", lvl } : { en:s.en||"", ar:s.ar||"", ph:s.ph||"", cat:s.cat||"يومي", lvl:s.lvl||lvl }; }
+
+function getLevelWords(lvl) {
+  const arr = (window.SPEAKORA_DATA && window.SPEAKORA_DATA[lvl] && window.SPEAKORA_DATA[lvl].words) || [];
+  if (arr.length) return arr.map(normWord);
+  return lvl === "A1" ? DEMO_A1.map(normWord) : [];
+}
+function getAllWordsFlat() {
+  let out = [];
+  LEVEL_ORDER.forEach(l => getLevelWords(l).forEach(w => out.push(Object.assign({ lvl: l }, w))));
+  return out;
+}
+function getAllSentences() {
+  let out = [];
+  LEVEL_ORDER.forEach(l => {
+    const s = (window.SPEAKORA_DATA && window.SPEAKORA_DATA[l] && window.SPEAKORA_DATA[l].sentences) || [];
+    s.forEach(x => out.push(normSent(x, l)));
+  });
+  if (!out.length) out.push({ lvl:"A1", cat:"يومي", en:"I study English every day to improve my skills.", ar:"أدرس الإنجليزية كل يوم لتطوير مهاراتي.", ph:"آي سْتَادِي إِنْجْلِش..." });
+  return out;
+}
+
+function getMasteredForLevel(lvl, st = state) {
+  const words = getLevelWords(lvl);
+  let total = 0;
+  const lessons = Math.ceil(words.length / 20);
+  for (let i = 0; i < lessons; i++) {
+    if (st.passedLessons && st.passedLessons[`${lvl}_${i}`]) total += Math.min(20, words.length - i * 20);
+  }
+  return total;
+}
+function getTotalMastered(st = state) { return LEVEL_ORDER.reduce((s, l) => s + getMasteredForLevel(l, st), 0); }
+
+function speak(text, customRate) {
+  try {
+    if (!("speechSynthesis" in window)) return;
+    window.speechSynthesis.cancel();
+    const u = new SpeechSynthesisUtterance(text);
+    u.lang = state.accent || "en-US";
+    u.rate = customRate || state.rate || 0.92;
+    window.speechSynthesis.speak(u);
+  } catch (e) {}
+}
+
+function playTone(ok) {
+  if (!state.sound) return;
+  try {
+    const ctx = new (window.AudioContext || window.webkitAudioContext)();
+    const osc = ctx.createOscillator(), g = ctx.createGain();
+    osc.connect(g); g.connect(ctx.destination);
+    osc.type = ok ? "sine" : "triangle";
+    osc.frequency.setValueAtTime(ok ? 560 : 210, ctx.currentTime);
+    osc.frequency.exponentialRampToValueAtTime(ok ? 900 : 130, ctx.currentTime + 0.15);
+    g.gain.setValueAtTime(0.1, ctx.currentTime);
+    g.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.19);
+    osc.start(); osc.stop(ctx.currentTime + 0.19);
+  } catch (e) {}
+}
+
+function toast(msg) {
+  const el = document.getElementById("toast");
+  el.innerText = msg; el.style.display = "block";
+  clearTimeout(toast._t);
+  toast._t = setTimeout(() => el.style.display = "none", 2300);
+}
+function shuffle(a) { const x = [...a]; for (let i = x.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [x[i], x[j]] = [x[j], x[i]]; } return x; }
+function addXp(n) { state.xp += n; state.dailyXp += n; saveState(); renderHeader(); }
+function addMistake(w) {
+  if (!w || !w.en) return;
+  if (!state.mistakes.some(m => m.en.toLowerCase() === w.en.toLowerCase())) {
+    state.mistakes.unshift({ en: w.en, ar: w.ar, ph: w.ph || "", ex: w.ex || "" });
+    saveState();
+  }
+}
+
+// ================= 5. بوابة التسجيل والدخول =================
+function initAuthUI() {
+  document.getElementById("cloud-status-pill").innerText = useCloud ? "☁️ متصل بالسحابة (Firebase أونلاين)" : "⚡ جاهز (محلي الآن • يقبل الربط السحابي)";
+  const pk = document.getElementById("avatar-picker");
+  pk.innerHTML = "";
+  AVATARS.forEach(a => {
+    const b = document.createElement("button");
+    b.className = "av-opt" + (a === pickedAvatar ? " active" : "");
+    b.innerText = a;
+    b.onclick = () => { pickedAvatar = a; initAuthUI(); };
+    pk.appendChild(b);
+  });
+}
+function setAuthMode(m) {
+  authMode = m;
+  document.getElementById("auth-tab-signup").classList.toggle("active", m === "signup");
+  document.getElementById("auth-tab-login").classList.toggle("active", m === "login");
+  document.getElementById("signup-fields").style.display = m === "signup" ? "block" : "none";
+  document.getElementById("au-submit").innerText = m === "signup" ? "إنشاء الحساب والبدء 🚀" : "تسجيل الدخول 🔑";
+  document.getElementById("auth-err").style.display = "none";
+}
+function showAuthErr(msg) { const e = document.getElementById("auth-err"); e.innerText = msg; e.style.display = "block"; }
+
+async function handleAuthSubmit() {
+  if (!(useCloud && fbAuth)) return showAuthErr("لا يوجد اتصال بالسحابة. حدّث الصفحة وحاول مرة أخرى.");
+  const email = document.getElementById("au-email").value.trim().toLowerCase();
+  const pass = document.getElementById("au-pass").value.trim();
+  const name = document.getElementById("au-name").value.trim();
+  if (!email || !email.includes("@")) return showAuthErr("يرجى كتابة بريد إلكتروني صحيح.");
+  if (pass.length < 6) return showAuthErr("كلمة المرور يجب أن تكون 6 أحرف على الأقل.");
+
+  if (useCloud && fbAuth) {
+    try {
+      if (authMode === "signup") {
+        if (!name) return showAuthErr("اكتب اسمك ليظهر على الشهادات.");
+        const cred = await fbAuth.createUserWithEmailAndPassword(email, pass);
+        currentUid = cred.user.uid;
+        state = createEmptyState(name, email, pickedAvatar);
+        await fbDb.collection("users").doc(currentUid).set(state);
+        enterAfterAuth();
+      } else {
+        const cred = await fbAuth.signInWithEmailAndPassword(email, pass);
+        currentUid = cred.user.uid;
+        const snap = await fbDb.collection("users").doc(currentUid).get();
+        state = snap.exists ? Object.assign(createEmptyState("", email), snap.data()) : createEmptyState(email.split("@")[0], email);
+        enterAfterAuth();
+      }
+    } catch (err) {
+      showAuthErr("خطأ من السحابة: " + (err.message || "تأكد من البيانات"));
+    }
+    return;
+  }
+
+  const accs = getLocalAccounts();
+  if (authMode === "signup") {
+    if (!name) return showAuthErr("اكتب اسمك ليظهر على الشهادات.");
+    if (accs[email]) return showAuthErr("هذا البريد مسجل بالفعل، اختر تسجيل الدخول.");
+    state = createEmptyState(name, email, pickedAvatar);
+    accs[email] = { pass, data: state };
+    saveLocalAccounts(accs);
+    localStorage.setItem("speakora_session_v2", email);
+    enterAfterAuth();
+  } else {
+    if (!accs[email] || accs[email].pass !== pass) return showAuthErr("البريد الإلكتروني أو كلمة المرور غير صحيحة.");
+    state = Object.assign(createEmptyState(), accs[email].data);
+    localStorage.setItem("speakora_session_v2", email);
+    enterAfterAuth();
+  }
+}
+let premiumFlag = false;
+function isPremium() { return premiumFlag || isAdmin(); }
+async function loadEntitlement() {
+  premiumFlag = false;
+  if (useCloud && fbDb && currentUid) {
+    try {
+      const d = await fbDb.collection("entitlements").doc(currentUid).get();
+      premiumFlag = !!(d.exists && d.data().premium === true);
+    } catch (e) {}
+  }
+  renderProfile();
+}
+async function loadAnnouncement() {
+  if (!(useCloud && fbDb && currentUid)) return;
+  try {
+    const d = await fbDb.collection("announcements").doc("current").get();
+    if (!d.exists) return;
+    const a = d.data();
+    if (!a.text || a.id === state.seenAnnId) return;
+    const old = document.getElementById("ann-banner");
+    if (old) old.remove();
+    const el = document.createElement("div");
+    el.id = "ann-banner";
+    el.style.cssText = "position:fixed; top:10px; left:10px; right:10px; z-index:200; background:var(--card); border:1px solid var(--gold); border-radius:14px; padding:12px 14px; box-shadow:0 8px 30px rgba(0,0,0,0.5); max-width:520px; margin:0 auto; font-size:0.88rem;";
+    const t = document.createElement("div");
+    t.style.cssText = "margin-bottom:8px; line-height:1.6;";
+    t.textContent = "📢 " + a.text;
+    const b = document.createElement("button");
+    b.className = "btn-gold";
+    b.textContent = "حسناً";
+    b.onclick = () => { state.seenAnnId = a.id; saveState(); el.remove(); };
+    el.appendChild(t); el.appendChild(b);
+    document.body.appendChild(el);
+  } catch (e) {}
+}
+  function enterAfterAuth() {
+  const today = new Date().toDateString();
+  if (state.lastDay !== today) { state.dailyXp = 0; state.streak = (state.streak || 1) + 1; state.lastDay = today; }
+  document.getElementById("auth-gate").classList.remove("open");
+  saveState();
+  renderAll();
+  loadEntitlement(); loadAnnouncement();
+  if (!state.placementDone) {
+    document.getElementById("pl-user-name").innerText = state.name.split(" ")[0] || "بطل";
+    document.getElementById("placement-gate").classList.add("open");
+  }
+}
+
+// ================= 6. اختبار تحديد المستوى في البداية =================
+function startPlacementTest() {
+  document.getElementById("placement-gate").classList.remove("open");
+  launchQuiz({
+    mode: "placement",
+    title: "🎯 اختبار تحديد المستوى (Speakora)",
+    passPct: 0, xpReward: 50,
+    questions: PLACEMENT_QUESTIONS.map(q => Object.assign({ type: "choice" }, q))
+  });
+}
+
+// ================= 7. وضع الاستماع التلقائي (المواصلات 🎧) =================
+let autoTimer = null, autoModeActive = false;
+function stopAutoListen() {
+  autoModeActive = false;
+  clearTimeout(autoTimer);
+  try { window.speechSynthesis.cancel(); } catch(e){}
+  const sBtn = document.getElementById("sent-auto-btn");
+  if (sBtn) { sBtn.classList.remove("active-play"); sBtn.innerText = "🎧 تشغيل وضع الاستماع التلقائي (المواصلات)"; }
+}
+
+function toggleSentenceAutoListen() {
+  if (autoModeActive) { stopAutoListen(); toast("تم إيقاف الاستماع التلقائي"); return; }
+  const list = getFilteredSentences();
+  if (!list.length) return;
+  autoModeActive = true;
+  const sBtn = document.getElementById("sent-auto-btn");
+  sBtn.classList.add("active-play");
+  sBtn.innerText = "⏹️ إيقاف الاستماع التلقائي";
+  let i = 0;
+  function playNext() {
+    if (!autoModeActive) return;
+    const item = list[i % list.length];
+    toast(`🎧 (${(i % list.length) + 1}/${list.length}) ${item.en.slice(0, 32)}...`);
+    speak(item.en);
+    i++;
+    autoTimer = setTimeout(playNext, 4200);
+  }
+  playNext();
+}
+
+// ================= 8. رسم الشاشات الرئيسية =================
+function isAdmin() { return (state.email || "").toLowerCase() === ADMIN_EMAIL; }
+
+function renderHeader() {
+  document.getElementById("hdr-user").innerText = `${state.avatar || "🎓"} ${state.name.split(" ")[0]}`;
+  document.getElementById("hdr-xp").innerText = state.xp;
+  document.getElementById("hdr-streak").innerText = state.streak;
+  document.getElementById("goal-txt").innerText = `${state.dailyXp} / 100 XP`;
+  document.getElementById("goal-bar").style.width = Math.min(100, state.dailyXp) + "%";
+  document.body.classList.toggle("light", state.theme === "light");
+  document.getElementById("theme-btn").innerText = state.theme === "light" ? "🌙" : "☀️";
+  const adm = isAdmin();
+  document.getElementById("open-admin-hdr").style.display = adm ? "flex" : "none";
+  document.getElementById("open-admin-prof").style.display = adm ? "block" : "none";
+}
+
+function renderWotd() {
+  const all = getAllWordsFlat();
+  if (!all.length) return;
+  const daySeed = Math.floor(Date.now() / 86400000);
+  const w = all[daySeed % all.length];
+  document.getElementById("wotd-lvl").innerText = `مستوى ${w.lvl}`;
+  document.getElementById("wotd-en").innerText = w.en;
+  document.getElementById("wotd-ar").innerText = `${w.ar}${w.ph ? " • " + w.ph : ""}`;
+  document.getElementById("wotd-ex").innerText = w.ex ? `"${w.ex}"` : "";
+  document.getElementById("wotd-say").onclick = () => speak(w.en + (w.ex ? ". " + w.ex : ""));
+  document.getElementById("wotd-save").onclick = () => {
+    if (!state.customWords.some(x => x.en.toLowerCase() === w.en.toLowerCase())) {
+      state.customWords.unshift({ en: w.en, ar: w.ar, ph: w.ph || "" });
+      saveState(); renderDict(); toast("أضيفت كلمة اليوم لقاموسك ⭐");
+    } else toast("الكلمة موجودة بالفعل في قاموسك");
+  };
+}
+
+function isLevelUnlocked(lvl) {
+  if (state.freeBrowse || lvl === "A1") return true;
+  if (state.unlockedLevels && state.unlockedLevels.includes(lvl)) return true;
+  const idx = LEVEL_ORDER.indexOf(lvl);
+  return !!(state.passedExams && state.passedExams[LEVEL_ORDER[idx - 1]]);
+}
+
+function renderPath() {
+  renderWotd();
+  document.getElementById("speed-best-lbl").innerText = `أعلى رقم: ${state.speedBest || 0}`;
+  document.getElementById("placed-lvl-lbl").innerText = `مستواك: ${state.placementLevel || "A1"}`;
+
+  const grid = document.getElementById("lvl-grid");
+  grid.innerHTML = "";
+  LEVEL_ORDER.forEach(lvl => {
+    const unlocked = isLevelUnlocked(lvl);
+    const btn = document.createElement("button");
+    btn.className = "lvl-btn" + (state.currentLevel === lvl ? " active" : "") + (!unlocked ? " locked" : "");
+    btn.innerHTML = `<strong>${lvl}${unlocked ? "" : " 🔒"}</strong><small>${LEVEL_META[lvl].target} كلمة</small>`;
+    btn.onclick = () => {
+      if (!unlocked) return toast("اجتز الاختبار الكبير للمستوى السابق أو أعد اختبار تحديد المستوى");
+      state.currentLevel = lvl; saveState(); renderPath();
+    };
+    grid.appendChild(btn);
+  });
+
+  const lvl = state.currentLevel;
+  const meta = LEVEL_META[lvl];
+  const words = getLevelWords(lvl);
+  const mastered = getMasteredForLevel(lvl);
+  const pct = words.length ? Math.round((mastered / words.length) * 100) : 0;
+
+  document.getElementById("hero-tag").innerText = `المستوى ${lvl} • ${meta.target} كلمة`;
+  document.getElementById("hero-title").innerText = meta.name;
+  document.getElementById("hero-desc").innerText = meta.desc;
+  document.getElementById("hero-words-meta").innerText = `${mastered} / ${words.length || meta.target} كلمة متقنة`;
+  document.getElementById("hero-pct").innerText = pct + "%";
+  document.getElementById("hero-bar").style.width = pct + "%";
+
+  const nodesEl = document.getElementById("path-nodes");
+  nodesEl.innerHTML = "";
+  const totalLessons = Math.ceil(words.length / 20);
+  const aligns = ["center", "right", "center", "left"];
+
+  for (let i = 0; i < totalLessons; i++) {
+    const start = i * 20;
+    const slice = words.slice(start, start + 20);
+    const key = `${lvl}_${i}`;
+    const passedScore = state.passedLessons[key];
+    const unlocked = state.freeBrowse || i === 0 || !!state.passedLessons[`${lvl}_${i - 1}`];
+
+    const row = document.createElement("div");
+    row.className = "path-node-row " + aligns[i % aligns.length];
+    const node = document.createElement("div");
+    node.className = "lesson-node" + (passedScore ? " passed" : (unlocked ? " current" : " locked"));
+    node.innerHTML = `
+      <div class="node-circle">${passedScore ? "✓" : (unlocked ? i + 1 : "🔒")}</div>
+      <div class="node-txt">
+        <h3>الدرس ${i + 1} (${lvl})</h3>
+        <p>الكلمات ${start + 1} – ${start + slice.length} • دراسة + استماع + اختبار</p>
+      </div>
+      <span class="node-badge">${passedScore ? passedScore + "%" : (unlocked ? "ابدأ" : "مغلق")}</span>
+    `;
+    node.onclick = () => {
+      if (!unlocked) return toast("اجتز اختبار الدرس السابق بنسبة 70% فأكثر");
+      openLessonStudy(lvl, i, slice);
+    };
+    row.appendChild(node);
+    nodesEl.appendChild(row);
+  }
+
+  const allDone = totalLessons > 0 && Array.from({ length: totalLessons }, (_, i) => !!state.passedLessons[`${lvl}_${i}`]).every(Boolean);
+  const examUnlocked = (state.freeBrowse || allDone) && words.length >= 4;
+  const examPassed = state.passedExams[lvl];
+  document.getElementById("ge-title").innerText = `🏆 الاختبار الكبير لنهاية المستوى ${lvl}`;
+  document.getElementById("ge-desc").innerText = examPassed
+    ? `ممتاز! اجتزت هذا الاختبار بنسبة ${examPassed.score}% بتاريخ ${examPassed.date}.`
+    : `اختبار شامل (${Math.min(25, words.length)} سؤالاً). النجاح بنسبة 75% يفتح المستوى التالي ويصدر شهادتك.`;
+  const geBtn = document.getElementById("ge-btn");
+  geBtn.disabled = !examUnlocked;
+  geBtn.innerText = examPassed ? "إعادة الاختبار الكبير ↻" : (examUnlocked ? "ابدأ الاختبار الكبير الآن" : "أكمل دروس المستوى لفتح الاختبار");
+  geBtn.onclick = () => startGrandExam(lvl, words);
+}
+
+// ================= 9. مشغل الدراسة + وضع المواصلات داخل الدرس =================
+let studyCtx = null;
+function openLessonStudy(lvl, lessonIdx, words) {
+  stopAutoListen();
+  studyCtx = { lvl, lessonIdx, words, idx: 0 };
+  document.getElementById("overlay").classList.add("open");
+  document.getElementById("ov-foot").style.display = "block";
+  renderStudyCard();
+}
+
+function renderStudyCard() {
+  const { lvl, lessonIdx, words, idx } = studyCtx;
+  const w = words[idx];
+  document.getElementById("ov-title").innerText = `دراسة الدرس ${lessonIdx + 1} (${lvl})`;
+  document.getElementById("ov-counter").innerText = `${idx + 1} / ${words.length}`;
+  document.getElementById("ov-bar").style.width = ((idx + 1) / words.length * 100) + "%";
+  document.getElementById("ov-fb").className = "fb-box";
+
+  document.getElementById("ov-body").innerHTML = `
+    <div class="study-card">
+      <span class="q-tag">بطاقة ${idx + 1} من ${words.length}</span>
+      <div class="study-word">${w.en}</div>
+      ${w.ph ? `<div class="ph-tag">النطق: ${w.ph}</div>` : ""}
+      <div class="study-ar">${w.ar}</div>
+      <div style="display:flex; justify-content:center; gap:8px; margin-top:12px;">
+        <button class="btn-outline" style="width:auto; padding:7px 14px;" id="st-say">🔊 استمع</button>
+        <button class="btn-outline" style="width:auto; padding:7px 14px;" id="st-slow">🐢 بطيء</button>
+      </div>
+      ${w.ex ? `<div class="study-ex">"${w.ex}"</div>` : ""}
+    </div>
+    <button class="btn-outline ${autoModeActive ? "active-play" : ""}" id="st-auto-btn" style="margin-bottom:9px;">
+      ${autoModeActive ? "⏹️ إيقاف الاستماع التلقائي" : "🎧 تشغيل الاستماع التلقائي لكلمات الدرس"}
+    </button>
+    <div style="display:flex; gap:8px;">
+      <button class="btn-outline" id="st-prev" ${idx === 0 ? "disabled" : ""}>السابق</button>
+      <button class="btn-outline" id="st-skip-quiz">الاختبار مباشرة ⚡</button>
+    </div>
+  `;
+  document.getElementById("st-say").onclick = () => speak(w.en + (w.ex ? ". " + w.ex : ""));
+  document.getElementById("st-slow").onclick = () => speak(w.en, 0.6);
+  document.getElementById("st-prev").onclick = () => { stopAutoListen(); if (studyCtx.idx > 0) { studyCtx.idx--; renderStudyCard(); } };
+  document.getElementById("st-skip-quiz").onclick = () => { stopAutoListen(); startLessonQuiz(lvl, lessonIdx, words); };
+  document.getElementById("st-auto-btn").onclick = () => {
+    if (autoModeActive) { stopAutoListen(); renderStudyCard(); return; }
+    autoModeActive = true;
+    function stepAuto() {
+      if (!autoModeActive || !studyCtx) return;
+      renderStudyCard();
+      const curW = studyCtx.words[studyCtx.idx];
+      speak(curW.en + (curW.ex ? ". " + curW.ex : ""));
+      autoTimer = setTimeout(() => {
+        if (!autoModeActive) return;
+        if (studyCtx.idx < studyCtx.words.length - 1) { studyCtx.idx++; stepAuto(); }
+        else { stopAutoListen(); renderStudyCard(); toast("انتهى استماع كلمات الدرس 🎧"); }
+      }, 4200);
+    }
+    stepAuto();
+  };
+
+  const act = document.getElementById("ov-action");
+  act.disabled = false;
+  act.innerText = idx === words.length - 1 ? "ابدأ اختبار الدرس (10 أسئلة) 🎯" : "الكلمة التالية ⬅️";
+  act.onclick = () => {
+    stopAutoListen();
+    if (studyCtx.idx < words.length - 1) { studyCtx.idx++; renderStudyCard(); }
+    else startLessonQuiz(lvl, lessonIdx, words);
+  };
+}
+
+// ================= 10. محرك الاختبارات الموحد + تحدي الـ 60 ثانية =================
+let quizCtx = null, speedTimer = null;
+
+function buildWordQuestions(pool, count, fullPool) {
+  const dist = fullPool.length >= 4 ? fullPool : pool;
+  const picked = shuffle(pool).slice(0, Math.min(count, pool.length));
+  return picked.map((w, i) => {
+    const others = shuffle(dist.filter(x => x.en !== w.en)).slice(0, 3);
+    if (i % 4 === 3 && others.length >= 3) return { type: "match", pairs: [w, ...others].slice(0, 4), wordRef: w };
+    if (i % 4 === 1) {
+      const opts = shuffle([w, ...others]);
+      return { type: "choice", ltr: true, wordRef: w, tag: "🔄 اختر الكلمة الإنجليزية", prompt: `ما هي الكلمة الإنجليزية لمعنى: "${w.ar}"؟`, options: opts.map(o => o.en), answer: opts.findIndex(o => o.en === w.en) };
+    }
+    if (i % 4 === 2) {
+      const opts = shuffle([w, ...others]);
+      return { type: "choice", wordRef: w, tag: "🎧 اختبار استماع", prompt: "اضغط السماعة واستمع ثم اختر المعنى:", say: w.en, options: opts.map(o => o.ar), answer: opts.findIndex(o => o.en === w.en) };
+    }
+    const opts = shuffle([w, ...others]);
+    return { type: "choice", wordRef: w, tag: "📖 اختر الترجمة الصحيحة", prompt: w.en, say: w.en, showWord: true, options: opts.map(o => o.ar), answer: opts.findIndex(o => o.en === w.en) };
+  });
+}
+
+function startLessonQuiz(lvl, lessonIdx, words) {
+  launchQuiz({ mode: "lesson", title: `اختبار الدرس ${lessonIdx + 1} (${lvl})`, lvl, lessonIdx, passPct: 70, xpReward: 35, questions: buildWordQuestions(words, Math.min(10, words.length), getLevelWords(lvl)) });
+}
+
+function startGrandExam(lvl, words) {
+  const qs = buildWordQuestions(words, Math.min(22, words.length), words);
+  getAllSentences().filter(s => s.lvl === lvl).slice(0, 3).forEach(s => {
+    const c = s.en.replace(/[.,?!]/g, "").split(/\s+/).filter(Boolean);
+    if (c.length >= 4 && c.length <= 10) qs.push({ type: "build", ar: s.ar, en: c.join(" "), words: shuffle(c) });
+  });
+  launchQuiz({ mode: "grand", title: `الاختبار الكبير • مستوى ${lvl}`, lvl, passPct: 75, xpReward: 120, questions: shuffle(qs).slice(0, Math.min(25, qs.length)) });
+}
+
+function startSpeedChallenge() {
+  stopAutoListen(); clearInterval(speedTimer);
+  const all = getAllWordsFlat();
+  if (all.length < 4) return toast("أضف ملفات الكلمات أولاً");
+  let timeLeft = 60, score = 0;
+  document.getElementById("overlay").classList.add("open");
+  document.getElementById("ov-foot").style.display = "none";
+
+  function nextSpeedQ() {
+    const w = all[Math.floor(Math.random() * all.length)];
+    const others = shuffle(all.filter(x => x.en !== w.en)).slice(0, 3);
+    const opts = shuffle([w, ...others]);
+    document.getElementById("ov-title").innerText = `⚡ تحدي 60 ثانية • النقاط: ${score}`;
+    document.getElementById("ov-counter").innerText = `⏱️ ${timeLeft} ث`;
+    document.getElementById("ov-bar").style.width = (timeLeft / 60 * 100) + "%";
+    document.getElementById("ov-body").innerHTML = `
+      <div class="study-card" style="padding:18px; margin-bottom:14px;">
+        <span class="q-tag">أجب بأسرع ما يمكن!</span>
+        <div class="study-word" style="font-size:1.7rem;">${w.en}</div>
+      </div>
+      <div class="opt-list" id="sp-opts"></div>
+    `;
+    const list = document.getElementById("sp-opts");
+    opts.forEach(o => {
+      const b = document.createElement("button");
+      b.className = "opt-btn"; b.innerText = o.ar;
+      b.onclick = () => {
+        if (o.en === w.en) { score++; playTone(true); b.classList.add("ok"); }
+        else { playTone(false); b.classList.add("err"); addMistake(w); }
+        setTimeout(nextSpeedQ, 180);
+      };
+      list.appendChild(b);
+    });
+  }
+
+  nextSpeedQ();
+  speedTimer = setInterval(() => {
+    timeLeft--;
+    document.getElementById("ov-counter").innerText = `⏱️ ${timeLeft} ث`;
+    document.getElementById("ov-bar").style.width = (timeLeft / 60 * 100) + "%";
+    if (timeLeft <= 0) {
+      clearInterval(speedTimer);
+      const isRecord = score > (state.speedBest || 0);
+      if (isRecord) state.speedBest = score;
+      const earned = score * 3;
+      addXp(earned);
+      document.getElementById("ov-foot").style.display = "block";
+      document.getElementById("ov-fb").className = "fb-box";
+      document.getElementById("ov-body").innerHTML = `
+        <div class="study-card" style="margin-top:24px;">
+          <div style="font-size:3.4rem;">⚡</div>
+          <h2>انتهى الوقت!</h2>
+          <p style="margin:10px 0; color:var(--muted);">إجاباتك الصحيحة: <b style="color:var(--gold-light); font-size:1.4rem;">${score}</b></p>
+          ${isRecord ? `<div class="q-tag">🎉 رقم قياسي جديد!</div><br>` : ""}
+          <div class="pill" style="display:inline-flex; padding:8px 18px;">⚡ +${earned} XP</div>
+        </div>
+      `;
+      const act = document.getElementById("ov-action");
+      act.disabled = false; act.innerText = "إغلاق والعودة";
+      act.onclick = () => { document.getElementById("overlay").classList.remove("open"); renderAll(); };
+    }
+  }, 1000);
+}
+
+function launchQuiz(cfg) {
+  stopAutoListen(); clearInterval(speedTimer);
+  quizCtx = Object.assign({ idx: 0, correct: 0, state: "answering", selected: null, built: [], matchSel: null, matchDone: [] }, cfg);
+  document.getElementById("overlay").classList.add("open");
+  document.getElementById("ov-foot").style.display = "block";
+  renderQuizQuestion();
+}
+
+function renderQuizQuestion() {
+  const q = quizCtx.questions[quizCtx.idx];
+  quizCtx.state = "answering"; quizCtx.selected = null; quizCtx.built = []; quizCtx.matchSel = null; quizCtx.matchDone = [];
+  document.getElementById("ov-title").innerText = quizCtx.title;
+  document.getElementById("ov-counter").innerText = `${quizCtx.idx + 1} / ${quizCtx.questions.length}`;
+  document.getElementById("ov-bar").style.width = (quizCtx.idx / quizCtx.questions.length * 100) + "%";
+  const fb = document.getElementById("ov-fb"); fb.className = "fb-box"; fb.innerText = "";
+  const act = document.getElementById("ov-action"); act.innerText = "تحقق من الإجابة"; act.disabled = true; act.onclick = handleQuizAction;
+  const body = document.getElementById("ov-body"); body.innerHTML = "";
+
+  if (q.type === "choice") {
+    body.innerHTML = `
+      <span class="q-tag">${q.tag || "اختر الإجابة الصحيحة"}</span>
+      ${q.showWord ? `<div class="study-card" style="padding:16px; margin-bottom:13px;"><div class="study-word" style="font-size:1.55rem;">${q.prompt}</div><button class="btn-outline" style="width:auto; padding:6px 14px;" id="q-say">🔊 استمع</button></div>`
+      : `<div class="q-title">${q.prompt}</div>${q.say ? `<button class="btn-outline" style="margin-bottom:13px;" id="q-say">🔊 استمع للجملة</button>` : ""}`}
+      <div class="opt-list" id="q-opts"></div>
+    `;
+    if (q.say) { document.getElementById("q-say").onclick = () => speak(q.say); if (!q.showWord) speak(q.say); }
+    const list = document.getElementById("q-opts");
+    q.options.forEach((opt, i) => {
+      const b = document.createElement("button");
+      b.className = "opt-btn" + (q.ltr ? " ltr" : ""); b.innerText = opt;
+      b.onclick = () => {
+        if (quizCtx.state !== "answering") return;
+        quizCtx.selected = i;
+        list.querySelectorAll(".opt-btn").forEach(x => x.classList.remove("selected"));
+        b.classList.add("selected"); act.disabled = false;
+      };
+      list.appendChild(b);
+    });
+  } else if (q.type === "build") {
+    body.innerHTML = `<span class="q-tag">🧩 رتب الكلمات لتكوين الجملة</span><div class="q-title">${q.ar}</div><div class="drop-zone" id="q-drop"></div><div class="word-bank" id="q-bank"></div>`;
+    renderBuildUI(q);
+  } else if (q.type === "match") {
+    body.innerHTML = `<span class="q-tag">🔗 وصّل كل كلمة بمعناها</span><div class="match-grid"><div class="match-col" id="m-en"></div><div class="match-col" id="m-ar"></div></div>`;
+    const enCol = document.getElementById("m-en"), arCol = document.getElementById("m-ar");
+    shuffle(q.pairs.map((p, i) => ({ txt: p.en, id: i }))).forEach(item => {
+      const b = document.createElement("button"); b.className = "opt-btn ltr"; b.innerText = item.txt;
+      b.onclick = () => selectMatch("en", item.id, b, q); enCol.appendChild(b);
+    });
+    shuffle(q.pairs.map((p, i) => ({ txt: p.ar, id: i }))).forEach(item => {
+      const b = document.createElement("button"); b.className = "opt-btn"; b.innerText = item.txt;
+      b.onclick = () => selectMatch("ar", item.id, b, q); arCol.appendChild(b);
+    });
+  }
+}
+
+function selectMatch(side, id, btn, q) {
+  if (quizCtx.matchDone.includes(id)) return;
+  if (!quizCtx.matchSel) { quizCtx.matchSel = { side, id, btn }; btn.classList.add("selected"); if (side === "en") speak(btn.innerText); }
+  else if (quizCtx.matchSel.side === side) { quizCtx.matchSel.btn.classList.remove("selected"); quizCtx.matchSel = { side, id, btn }; btn.classList.add("selected"); }
+  else {
+    const f = quizCtx.matchSel; quizCtx.matchSel = null;
+    if (f.id === id) {
+      playTone(true); f.btn.classList.remove("selected"); f.btn.classList.add("ok"); btn.classList.add("ok"); quizCtx.matchDone.push(id);
+      if (quizCtx.matchDone.length === q.pairs.length) {
+        quizCtx.correct++; quizCtx.state = "next";
+        const fb = document.getElementById("ov-fb"); fb.className = "fb-box ok"; fb.innerText = "ممتاز! وصّلت جميع الأزواج بنجاح 🎉";
+        const act = document.getElementById("ov-action"); act.disabled = false; act.innerText = quizCtx.idx === quizCtx.questions.length - 1 ? "عرض النتيجة 🏆" : "التالي ⬅️";
+      }
+    } else {
+      playTone(false); f.btn.classList.remove("selected"); f.btn.classList.add("err"); btn.classList.add("err");
+      setTimeout(() => { f.btn.classList.remove("err"); btn.classList.remove("err"); }, 420);
+    }
+  }
+}
+
+function renderBuildUI(q) {
+  const drop = document.getElementById("q-drop"), bank = document.getElementById("q-bank");
+  drop.innerHTML = ""; bank.innerHTML = "";
+  quizCtx.built.forEach((wi, pos) => {
+    const p = document.createElement("button"); p.className = "w-pill placed"; p.innerText = q.words[wi];
+    p.onclick = () => { if (quizCtx.state === "answering") { quizCtx.built.splice(pos, 1); renderBuildUI(q); } };
+    drop.appendChild(p);
+  });
+  q.words.forEach((w, idx) => {
+    const p = document.createElement("button"); p.className = "w-pill" + (quizCtx.built.includes(idx) ? " used" : ""); p.innerText = w;
+    p.onclick = () => { if (quizCtx.state === "answering") { quizCtx.built.push(idx); renderBuildUI(q); } };
+    bank.appendChild(p);
+  });
+  document.getElementById("ov-action").disabled = quizCtx.built.length === 0;
+}
+
+function handleQuizAction() {
+  const q = quizCtx.questions[quizCtx.idx], fb = document.getElementById("ov-fb"), act = document.getElementById("ov-action");
+  if (quizCtx.state === "next") {
+    quizCtx.idx++;
+    if (quizCtx.idx >= quizCtx.questions.length) finishQuiz(); else renderQuizQuestion();
+    return;
+  }
+  let ok = false, rightTxt = "";
+  if (q.type === "choice") {
+    ok = quizCtx.selected === q.answer; rightTxt = q.options[q.answer];
+    const btns = document.querySelectorAll("#q-opts .opt-btn");
+    btns[q.answer].classList.add("ok");
+    if (!ok && quizCtx.selected !== null) btns[quizCtx.selected].classList.add("err");
+  } else if (q.type === "build") {
+    ok = quizCtx.built.map(i => q.words[i]).join(" ").toLowerCase().trim() === q.en.toLowerCase().trim();
+    rightTxt = q.en; if (ok) speak(q.en);
+  }
+  quizCtx.state = "next";
+  if (ok) {
+    quizCtx.correct++; playTone(true); fb.className = "fb-box ok"; fb.innerText = "إجابة صحيحة! أحسنت 🎉";
+    if (quizCtx.mode === "mistakes" && q.wordRef) { state.mistakes = state.mistakes.filter(m => m.en !== q.wordRef.en); saveState(); }
+  } else {
+    playTone(false); if (q.wordRef) addMistake(q.wordRef);
+    fb.className = "fb-box err"; fb.innerText = `إجابة غير صحيحة. الصواب: ${rightTxt}`;
+  }
+  act.innerText = quizCtx.idx === quizCtx.questions.length - 1 ? "عرض النتيجة 🏆" : "التالي ⬅️";
+}
+
+function finishQuiz() {
+  const pct = Math.round((quizCtx.correct / quizCtx.questions.length) * 100);
+  document.getElementById("ov-bar").style.width = "100%";
+  document.getElementById("ov-fb").className = "fb-box";
+
+  if (quizCtx.mode === "placement") {
+    let determined = "A1";
+    if (quizCtx.correct >= 10) determined = "B2";
+    else if (quizCtx.correct >= 7) determined = "B1";
+    else if (quizCtx.correct >= 4) determined = "A2";
+    const idx = LEVEL_ORDER.indexOf(determined);
+    state.placementDone = true; state.placementLevel = determined; state.placementScore = quizCtx.correct;
+    state.currentLevel = determined;
+    state.unlockedLevels = LEVEL_ORDER.slice(0, idx + 1);
+    addXp(50); playTone(true);
+    document.getElementById("ov-body").innerHTML = `
+      <div class="study-card" style="margin-top:20px;">
+        <div style="font-size:3.5rem;">🎯</div>
+        <h2 style="margin:8px 0;">مستواك الحالي هو: <span style="color:var(--gold-light);">${determined}</span></h2>
+        <p style="color:var(--muted); margin-bottom:14px;">أجبت على <b>${quizCtx.correct}</b> من 12 سؤالاً بشكل صحيح. تم فتح المسار حتى مستوى <b>${determined}</b> تلقائياً!</p>
+        <div class="pill" style="display:inline-flex; padding:8px 18px;">⚡ +50 XP • 🏅 وسام تحديد المستوى</div>
+      </div>
+    `;
+    const act = document.getElementById("ov-action"); act.disabled = false; act.innerText = `ابدأ التعلم من مستوى ${determined} 🚀`;
+    act.onclick = () => { document.getElementById("overlay").classList.remove("open"); renderAll(); };
+    return;
+  }
+
+  const passed = pct >= quizCtx.passPct;
+  if (passed) {
+    playTone(true);
+    if (quizCtx.mode === "lesson") {
+      const k = `${quizCtx.lvl}_${quizCtx.lessonIdx}`;
+      state.passedLessons[k] = Math.max(state.passedLessons[k] || 0, pct);
+    } else if (quizCtx.mode === "grand") {
+      state.passedExams[quizCtx.lvl] = { score: pct, date: new Date().toLocaleDateString("ar-EG") };
+      const nextIdx = LEVEL_ORDER.indexOf(quizCtx.lvl) + 1;
+      if (nextIdx < LEVEL_ORDER.length && !state.unlockedLevels.includes(LEVEL_ORDER[nextIdx])) state.unlockedLevels.push(LEVEL_ORDER[nextIdx]);
+    }
+    addXp(quizCtx.xpReward);
+  }
+  document.getElementById("ov-body").innerHTML = `
+    <div class="study-card" style="margin-top:22px;">
+      <div style="font-size:3.4rem;">${passed ? "🏆" : "💪"}</div>
+      <h2 style="margin:8px 0;">${passed ? "مبروك! اجتزت الاختبار بنجاح" : "حاول مرة أخرى"}</h2>
+      <p style="color:var(--muted); margin-bottom:14px;">النتيجة: <b style="color:var(--gold-light); font-size:1.25rem;">${pct}%</b> (${quizCtx.correct} من ${quizCtx.questions.length})</p>
+      ${passed ? `<div class="pill" style="display:inline-flex; padding:8px 18px;">⚡ +${quizCtx.xpReward} XP</div>` : `<p style="font-size:0.8rem; color:var(--muted);">مطلوب ${quizCtx.passPct}% للاجتياز.</p>`}
+      ${passed && quizCtx.mode === "grand" ? `<button class="btn-gold" style="margin-top:15px;" id="open-cert-now">🏅 عرض شهادة ${quizCtx.lvl}</button>` : ""}
+    </div>
+  `;
+  if (passed && quizCtx.mode === "grand") document.getElementById("open-cert-now").onclick = () => showCertificate(quizCtx.lvl);
+  const act = document.getElementById("ov-action"); act.disabled = false; act.innerText = "العودة للتطبيق";
+  act.onclick = () => { document.getElementById("overlay").classList.remove("open"); renderAll(); };
+}
+
+// ================= 11. الجمل والمحادثات ومدرب النطق والقوالب =================
+let sentLvl = "ALL", sentCat = "الكل";
+function getFilteredSentences() {
+  return getAllSentences().filter(s => (sentLvl === "ALL" || s.lvl === sentLvl) && (sentCat === "الكل" || s.cat === sentCat));
+}
+function renderSentences() {
+  const all = getAllSentences();
+  const lEl = document.getElementById("sent-lvl-chips"); lEl.innerHTML = "";
+  ["ALL", ...LEVEL_ORDER].forEach(l => {
+    const c = document.createElement("button"); c.className = "chip" + (sentLvl === l ? " active" : "");
+    c.innerText = l === "ALL" ? "الكل" : l; c.onclick = () => { sentLvl = l; renderSentences(); }; lEl.appendChild(c);
+  });
+  const cEl = document.getElementById("sent-cat-chips"); cEl.innerHTML = "";
+  ["الكل", ...new Set(all.map(s => s.cat))].forEach(cat => {
+    const c = document.createElement("button"); c.className = "chip" + (sentCat === cat ? " active" : "");
+    c.innerText = cat; c.onclick = () => { sentCat = cat; renderSentences(); }; cEl.appendChild(c);
+  });
+  const list = document.getElementById("sent-list"); list.innerHTML = "";
+  getFilteredSentences().forEach(s => {
+    const d = document.createElement("div"); d.className = "card";
+    d.innerHTML = `<span class="ph-tag">${s.lvl} • ${s.cat}</span><div class="en-row"><div class="en-txt">${s.en}</div><div class="mini-actions"><button class="mini-btn s-play">🔊</button><button class="mini-btn s-slow">🐢</button></div></div><div class="ar-txt">${s.ar}</div>${s.ph ? `<div class="ph-tag">${s.ph}</div>` : ""}`;
+    d.querySelector(".s-play").onclick = () => speak(s.en);
+    d.querySelector(".s-slow").onclick = () => speak(s.en, 0.62);
+    list.appendChild(d);
+  });
+}
+
+let rpIdx = 0, rpStep = 0, rpHist = [];
+function renderRoleplay() {
+  const chips = document.getElementById("rp-chips"); chips.innerHTML = "";
+  ROLEPLAYS.forEach((r, i) => {
+    const b = document.createElement("button"); b.className = "chip" + (rpIdx === i ? " active" : ""); b.innerText = r.title;
+    b.onclick = () => { rpIdx = i; rpStep = 0; rpHist = []; renderRoleplay(); }; chips.appendChild(b);
+  });
+  const rp = ROLEPLAYS[rpIdx];
+  document.getElementById("rp-title").innerText = rp.title;
+  if (!rpHist.length) rpHist.push({ from: "bot", en: rp.steps[0].bot, ar: rp.steps[0].botAr });
+  const chat = document.getElementById("rp-chat"); chat.innerHTML = "";
+  rpHist.forEach(m => {
+    const b = document.createElement("div"); b.className = "bubble " + m.from;
+    b.innerHTML = `<div style="display:flex; justify-content:space-between; align-items:center; gap:8px;"><span>${m.en}</span><button class="mini-btn" style="width:27px; height:27px; font-size:0.74rem;">🔊</button></div><div class="bubble-ar">${m.ar}</div>`;
+    b.onclick = () => b.classList.toggle("show-ar");
+    b.querySelector("button").onclick = e => { e.stopPropagation(); speak(m.en); };
+    chat.appendChild(b);
+  });
+  const opts = document.getElementById("rp-opts"); opts.innerHTML = "";
+  const step = rp.steps[rpStep];
+  if (!step || !step.opts.length) {
+    opts.innerHTML = `<div class="fb-box ok" style="display:block; text-align:center;">🎉 انتهت المحادثة بنجاح! +20 XP</div>`;
+  } else {
+    step.opts.forEach(o => {
+      const btn = document.createElement("button"); btn.className = "reply-btn";
+      btn.innerHTML = `${o.en}<small>${o.ar}</small>`;
+      btn.onclick = () => {
+        speak(o.en); rpHist.push({ from: "user", en: o.en, ar: o.ar }); rpStep++;
+        if (rp.steps[rpStep]) {
+          const nb = rp.steps[rpStep]; rpHist.push({ from: "bot", en: nb.bot, ar: nb.botAr });
+          if (!nb.opts.length) { state.roleplaysDone = (state.roleplaysDone || 0) + 1; addXp(20); }
+        }
+        renderRoleplay();
+      };
+      opts.appendChild(btn);
+    });
+  }
+}
+
+let coachIdx = 0;
+function renderCoach() {
+  const list = getAllSentences();
+  const s = list[coachIdx % list.length];
+  document.getElementById("coach-en").innerText = s.en;
+  document.getElementById("coach-ar").innerText = s.ar;
+  document.getElementById("coach-res").innerText = "اضغط على المايكروفون وانطق الجملة بالإنجليزية";
+}
+function startCoachMic() {
+  const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+  const res = document.getElementById("coach-res"), btn = document.getElementById("coach-mic");
+  if (!SR) { res.innerHTML = `<span style="color:#fca5a5;">افتح الموقع عبر متصفح Chrome على رابط HTTPS لتفعيل المايكروفون.</span>`; return; }
+  const target = document.getElementById("coach-en").innerText;
+  const rec = new SR(); rec.lang = state.accent || "en-US"; rec.interimResults = false;
+  btn.classList.add("listening"); res.innerText = "جاري الاستماع... تحدث الآن 🎙️";
+  rec.onresult = e => {
+    btn.classList.remove("listening");
+    const spoken = e.results[0][0].transcript;
+    const tW = target.toLowerCase().replace(/[^a-z0-9\s]/g, "").split(/\s+/);
+    const sW = spoken.toLowerCase().replace(/[^a-z0-9\s]/g, "").split(/\s+/);
+    const score = Math.round((tW.filter(w => sW.includes(w)).length / tW.length) * 100);
+    if (score >= 70) { playTone(true); addXp(10); }
+    res.innerHTML = `سمعتُ: <b dir="ltr">"${spoken}"</b><br><strong style="color:${score >= 70 ? "var(--success)" : "var(--gold-light)"};">دقة النطق: ${score}% ${score >= 70 ? "🎉 ممتاز! +10 XP" : "حاول مجدداً"}</strong>`;
+  };
+  rec.onerror = () => { btn.classList.remove("listening"); res.innerHTML = `<span style="color:#fca5a5;">تأكد من منح إذن المايكروفون في المتصفح.</span>`; };
+  rec.onend = () => btn.classList.remove("listening");
+  try { rec.start(); } catch(e) { btn.classList.remove("listening"); }
+}
+
+function renderTemplates() {
+  const pane = document.getElementById("pane-templates"); pane.innerHTML = "";
+  TEMPLATES.forEach(t => {
+    const c = document.createElement("div"); c.className = "card";
+    c.innerHTML = `<h3 style="font-size:0.95rem; color:var(--gold-light); margin-bottom:5px;">${t.title}</h3><p style="font-size:0.82rem; color:var(--muted); margin-bottom:7px; line-height:1.5;">${t.rule}</p><div class="ph-tag" dir="ltr" style="display:block; text-align:left; padding:6px 9px; font-weight:800;">${t.formula}</div>` +
+      t.examples.map((ex, i) => `<div style="border-top:1px dashed var(--border); padding-top:8px; margin-top:8px;"><div class="en-row" style="margin-bottom:2px;"><span class="en-txt" style="font-size:0.9rem;">${ex[0]}</span><button class="mini-btn ts" data-i="${i}">🔊</button></div><div style="font-size:0.8rem; color:var(--muted);">${ex[1]}</div></div>`).join("");
+    c.querySelectorAll(".ts").forEach(b => b.onclick = () => speak(t.examples[+b.dataset.i][0]));
+    pane.appendChild(c);
+  });
+}
+
+// ================= 12. القاموس والبحث والشهادة وحسابي والأدمن =================
+function renderDict() {
+  document.getElementById("mistake-count").innerText = state.mistakes.length;
+  const list = document.getElementById("mywords-list");
+  list.innerHTML = state.customWords.length ? "" : `<div class="card" style="text-align:center; color:var(--muted);">لم تضف كلمات خاصة بعد.</div>`;
+  state.customWords.forEach((w, i) => {
+    const d = document.createElement("div"); d.className = "card";
+    d.innerHTML = `<div class="en-row"><span class="en-txt">${w.en}</span><div class="mini-actions"><button class="mini-btn cs">🔊</button><button class="mini-btn cd">🗑️</button></div></div><div class="ar-txt">${w.ar}</div>${w.ph ? `<div class="ph-tag">${w.ph}</div>` : ""}`;
+    d.querySelector(".cs").onclick = () => speak(w.en);
+    d.querySelector(".cd").onclick = () => { state.customWords.splice(i, 1); saveState(); renderDict(); };
+    list.appendChild(d);
+  });
+  const ml = document.getElementById("mistakes-list");
+  ml.innerHTML = state.mistakes.length ? "" : `<div class="card" style="text-align:center; color:var(--success);">بنك الأخطاء فارغ! 🎉</div>`;
+  state.mistakes.forEach(w => {
+    const d = document.createElement("div"); d.className = "card";
+    d.innerHTML = `<div class="en-row"><span class="en-txt">${w.en}</span><button class="mini-btn ms">🔊</button></div><div class="ar-txt">${w.ar}</div>`;
+    d.querySelector(".ms").onclick = () => speak(w.en);
+    ml.appendChild(d);
+  });
+}
+
+function renderSearch(q) {
+  const res = document.getElementById("search-results");
+  const term = (q || "").trim().toLowerCase();
+  if (!term) { res.innerHTML = `<div class="card" style="text-align:center; color:var(--muted);">اكتب أي كلمة بالعربي أو الإنجليزي للبحث الفوري في 1000 كلمة و80 جملة...</div>`; return; }
+  const wHits = [...state.customWords.map(w => Object.assign({ lvl: "قاموسي" }, w)), ...getAllWordsFlat()]
+    .filter(w => w.en.toLowerCase().includes(term) || w.ar.includes(term)).slice(0, 35);
+  const sHits = getAllSentences().filter(s => s.en.toLowerCase().includes(term) || s.ar.includes(term)).slice(0, 15);
+  if (!wHits.length && !sHits.length) { res.innerHTML = `<div class="card" style="text-align:center; color:var(--muted);">لا توجد نتائج مطابقة لـ "${q}"</div>`; return; }
+  res.innerHTML = "";
+  wHits.forEach(w => {
+    const d = document.createElement("div"); d.className = "card";
+    d.innerHTML = `<span class="ph-tag">${w.lvl}</span><div class="en-row"><span class="en-txt">${w.en}</span><button class="mini-btn">🔊</button></div><div class="ar-txt">${w.ar}</div>${w.ex ? `<div class="ex-txt">"${w.ex}"</div>` : ""}`;
+    d.querySelector("button").onclick = () => speak(w.en);
+    res.appendChild(d);
+  });
+  sHits.forEach(s => {
+    const d = document.createElement("div"); d.className = "card";
+    d.innerHTML = `<span class="ph-tag">جملة • ${s.lvl}</span><div class="en-row"><span class="en-txt">${s.en}</span><button class="mini-btn">🔊</button></div><div class="ar-txt">${s.ar}</div>`;
+    d.querySelector("button").onclick = () => speak(s.en);
+    res.appendChild(d);
+  });
+}
+
+let activeCertLvl = "A1";
+function showCertificate(lvl) {
+  const info = state.passedExams[lvl]; if (!info) return;
+  activeCertLvl = lvl;
+  document.getElementById("c-name").innerText = state.name;
+  document.getElementById("c-body").innerText = `قد أتم بنجاح جميع متطلبات المستوى (${lvl} — ${LEVEL_META[lvl].name}) واجتاز الاختبار الشامل بنسبة ${info.score}%.`;
+  document.getElementById("c-date").innerText = `التاريخ: ${info.date}`;
+  document.getElementById("cert-modal").classList.add("open");
+}
+
+function renderProfile() {
+  document.getElementById("prof-avatar").innerText = state.avatar || "🎓";
+  document.getElementById("prof-name-lbl").innerText = state.name;
+  document.getElementById("prof-email-lbl").innerText = state.email;
+  document.getElementById("prof-sync-lbl").innerText = (useCloud ? "☁️ مزامنة سحابية نشطة" : "💾 محفوظ على هذا الجهاز") + (isPremium() ? " • ⭐ بريميوم" : "");
+
+  document.getElementById("st-words").innerText = `${getTotalMastered()} / 1000`;
+  document.getElementById("st-xp").innerText = state.xp;
+  document.getElementById("st-speed").innerText = state.speedBest || 0;
+  document.getElementById("st-certs").innerText = `${Object.keys(state.passedExams).length} / 4`;
+
+  const bg = document.getElementById("badges-grid"); bg.innerHTML = "";
+  BADGES_DEF.forEach(b => {
+    const un = (state.unlockedBadges || []).includes(b.id) || b.check(state);
+    bg.innerHTML += `<div class="badge-tile ${un ? "unlocked" : ""}"><span class="b-ico">${b.ico}</span><span>${b.title}</span></div>`;
+  });
+
+  const cl = document.getElementById("certs-list"); cl.innerHTML = "";
+  LEVEL_ORDER.forEach(lvl => {
+    const ex = state.passedExams[lvl];
+    const r = document.createElement("div");
+    r.style.cssText = "display:flex; justify-content:space-between; align-items:center; padding:9px 11px; background:var(--card-2); border-radius:11px; border:1px solid var(--border);";
+    r.innerHTML = `<span style="font-size:0.84rem; font-weight:700;">شهادة ${lvl} (${LEVEL_META[lvl].name})</span>`;
+    const b = document.createElement("button"); b.className = "mini-btn";
+    b.style.cssText = "width:auto; padding:0 11px; border-radius:9px; font-size:0.74rem; font-weight:800;";
+    b.innerText = ex ? `عرض (${ex.score}%)` : "مغلقة 🔒"; b.disabled = !ex;
+    b.onclick = () => showCertificate(lvl); r.appendChild(b); cl.appendChild(r);
+  });
+
+  document.getElementById("accent-us-btn").classList.toggle("active-play", (state.accent || "en-US") === "en-US");
+  document.getElementById("accent-gb-btn").classList.toggle("active-play", state.accent === "en-GB");
+  document.getElementById("rate-slider").value = state.rate || 0.92;
+  document.getElementById("rate-lbl").innerText = `${state.rate || 0.92}x`;
+  document.getElementById("toggle-sound-btn").innerText = `🔊 المؤثرات الصوتية: ${state.sound ? "مفعّلة" : "صامتة"}`;
+  document.getElementById("toggle-free-btn").innerText = `🔓 التصفح الحر لجميع الدروس: ${state.freeBrowse ? "مفتوح" : "مغلق"}`;
+}
+  async function adminSendAnnouncement() {
+  if (!isAdmin() || !(useCloud && fbDb)) return;
+  const el = document.getElementById("ann-text");
+  const text = (el ? el.value : "").trim();
+  if (!text) return toast("اكتب الرسالة أولاً");
+  if (text.length > 300) return toast("الرسالة أطول من 300 حرف");
+  try {
+    await fbDb.collection("announcements").doc("current").set({ text: text, id: String(Date.now()), at: new Date().toISOString() });
+    toast("تم إرسال الرسالة لكل المستخدمين 📢");
+    if (el) el.value = "";
+  } catch (e) { toast("تعذر الإرسال. تأكد من القواعد."); }
+}
+async function adminClearAnnouncement() {
+  if (!isAdmin() || !(useCloud && fbDb)) return;
+  try {
+    await fbDb.collection("announcements").doc("current").delete();
+    toast("تم مسح الرسالة الحالية");
+  } catch (e) { toast("تعذر المسح. تأكد من القواعد."); }
+}
+let adminEnt = {};
+async function adminTogglePremium(uid, on) {
+  if (!isAdmin() || !(useCloud && fbDb)) return;
+  try {
+    if (on) await fbDb.collection("entitlements").doc(uid).set({ premium: true, updatedAt: new Date().toISOString(), by: "admin" });
+    else await fbDb.collection("entitlements").doc(uid).delete();
+    toast(on ? "تم منح البريميوم ⭐" : "تم سحب البريميوم");
+    openAdminPanel();
+  } catch (e) { toast("تعذر الحفظ. تأكد من القواعد."); }
+}
+function escHtml(s) { return String(s == null ? "" : s).replace(/[&<>"']/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c])); }
+  async function openAdminPanel() {
+  document.getElementById("admin-overlay").classList.add("open");
+  const body = document.getElementById("admin-body");
+  body.innerHTML = `<div class="card" style="text-align:center;">جاري تحميل بيانات المستخدمين...</div>`;
+  let users = [];
+  if (useCloud && fbDb) {
+    try {
+    const snap =  await fbDb.collection("users").get();
+      snap.forEach(doc => users.push(Object.assign({ _uid: doc.id }, doc.data())));
+      try { const es = await fbDb.collection("entitlements").get(); adminEnt = {}; es.forEach(d => { adminEnt[d.id] = d.data().premium === true; }); } catch (e) { adminEnt = {}; }
+    } catch (e) {
+      body.innerHTML = `<div class="card" style="color:#fca5a5;">تأكد من قواعد Firestore Rules للسماح للأدمن بقراءة users.</div>`;
+      return;
+    }
+  } else {
+    const accs = getLocalAccounts();
+    users = Object.values(accs).map(a => a.data).filter(Boolean);
+  }
+  const totalXp = users.reduce((s, u) => s + (u.xp || 0), 0);
+  body.innerHTML = `
+    <div class="stats-grid">
+      <div class="stat-box"><div class="stat-num">${users.length}</div><div class="stat-lbl">إجمالي المستخدمين</div></div>
+      <div class="stat-box"><div class="stat-num">${totalXp}</div><div class="stat-lbl">مجموع نقاط المنصة</div></div>
+    </div>
+    <p style="font-size:0.78rem; color:var(--muted); margin-bottom:10px;">المصدر: ${useCloud ? "☁️ قاعدة بيانات Firebase السحابية" : "💾 الحسابات المسجلة محلياً"}</p>
+    ${useCloud ? `<div class="card"><strong>📢 رسالة لكل المستخدمين</strong><textarea id="ann-text" maxlength="300" rows="3" placeholder="اكتب الرسالة (حتى 300 حرف)" style="width:100%; margin:8px 0; padding:8px; border-radius:10px; border:1px solid var(--border); background:var(--card-2); color:inherit; font:inherit;"></textarea><div style="display:flex; gap:8px;"><button class="btn-gold" onclick="adminSendAnnouncement()">إرسال</button><button class="mini-btn" style="width:auto; padding:0 10px; border-radius:11px; font-size:0.74rem;" onclick="adminClearAnnouncement()">مسح الرسالة الحالية</button></div></div>` : ""}
+    ${users.map(u => `
+      <div class="card">
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:5px;">
+          <strong>${escHtml(u.avatar || "🎓")} ${escHtml(u.name || "بدون اسم")}</strong>
+          <span class="ph-tag" style="margin:0;">المستوى: ${u.currentLevel || "A1"}</span>
+        </div>
+        <div style="font-size:0.76rem; color:var(--muted); margin-bottom:6px;">${escHtml(u.email || "")}</div>
+        <div style="display:flex; gap:10px; font-size:0.78rem; color:var(--gold-light); font-weight:700;">
+        ${u._uid ? `<button class="mini-btn" style="width:auto; padding:0 10px; border-radius:11px; font-size:0.74rem; margin-bottom:6px;" onclick="adminTogglePremium('${u._uid}', ${!adminEnt[u._uid]})">${adminEnt[u._uid] ? "⭐ بريميوم (سحب)" : "منح بريميوم"}</button>` : ""}
+          <span>⚡ ${u.xp || 0} XP</span>
+          <span>📚 ${getTotalMastered(u)} كلمة</span>
+          <span>🎯 تحديد: ${u.placementLevel || "-"}</span>
+        </div>
+      </div>
+    `).join("") || `<div class="card" style="text-align:center;">لا يوجد مستخدمون بعد.</div>`}
+  `;
+}
+// ================= مسارات المهن =================
+const JOB_TRACKS = [
+  { id: "J_hotel_driver", name: "سائق فندق", icon: "🚗" },
+  { id: "J_cashier", name: "كاشير", icon: "🛒" }
+];
+(window.SPEAKORA_EXTRA_TRACKS || []).forEach(t => JOB_TRACKS.push(t));
+let jobsSel = null;
+
+function openJobsScreen() {
+  document.querySelectorAll(".screen").forEach(s => s.classList.remove("active"));
+  document.getElementById("sc-jobs").classList.add("active");
+  jobsSel = null;
+  renderJobs();
+}
+
+function renderJobs() {
+  const box = document.getElementById("jobs-body");
+  if (!box) return;
+  box.innerHTML = "";
+  if (!jobsSel) {
+    JOB_TRACKS.forEach(t => {
+      const words = getLevelWords(t.id);
+      const lessons = Math.ceil(words.length / 20);
+      let done = 0;
+      for (let i = 0; i < lessons; i++) if (state.passedLessons && state.passedLessons[`${t.id}_${i}`]) done++;
+      const b = document.createElement("button");
+      b.className = "card";
+      b.style.cssText = "width:100%; text-align:right; cursor:pointer; color:inherit; font:inherit;";
+      b.innerHTML = `<strong>${t.icon} ${t.name}</strong><div style="font-size:0.78rem; color:var(--muted); margin-top:4px;">${done} / ${lessons} دروس • ${words.length} كلمة</div>`;
+      b.onclick = () => {
+        if (!words.length) return toast("المسار غير جاهز بعد");
+        jobsSel = t.id; renderJobs();
+      };
+      box.appendChild(b);
+    });
+    return;
+  }
+  const t = JOB_TRACKS.find(x => x.id === jobsSel);
+  const words = getLevelWords(jobsSel);
+  const head = document.createElement("div");
+  head.className = "card";
+  head.innerHTML = `<strong>${t.icon} ${t.name}</strong> <button class="mini-btn" id="jobs-tracks-btn" style="width:auto; padding:0 10px; border-radius:11px; font-size:0.74rem; float:left;">كل المسارات</button>`;
+  box.appendChild(head);
+  head.querySelector("#jobs-tracks-btn").onclick = () => { jobsSel = null; renderJobs(); };
+  const wrap = document.createElement("div");
+  wrap.className = "path-wrap";
+  const lessons = Math.ceil(words.length / 20);
+  const aligns = ["center", "right", "center", "left"];
+  for (let i = 0; i < lessons; i++) {
+    const start = i * 20;
+    const slice = words.slice(start, start + 20);
+    const key = `${jobsSel}_${i}`;
+    const passedScore = state.passedLessons[key];
+    const unlocked = state.freeBrowse || i === 0 || !!state.passedLessons[`${jobsSel}_${i - 1}`];
+    const row = document.createElement("div");
+    row.className = "path-node-row " + aligns[i % aligns.length];
+    const node = document.createElement("div");
+    node.className = "lesson-node" + (passedScore ? " passed" : (unlocked ? " current" : " locked"));
+    node.innerHTML = `
+      <div class="node-circle">${passedScore ? "✓" : (unlocked ? i + 1 : "🔒")}</div>
+      <div class="node-txt">
+        <h3>الدرس ${i + 1}</h3>
+        <p>الكلمات ${start + 1} – ${start + slice.length} • دراسة + استماع + اختبار</p>
+      </div>
+      <span class="node-badge">${passedScore ? passedScore + "%" : (unlocked ? "ابدأ" : "مغلق")}</span>
+    `;
+    node.onclick = () => {
+      if (!unlocked) return toast("اجتز اختبار الدرس السابق بنسبة 70% فأكثر");
+      openLessonStudy(jobsSel, i, slice);
+    };
+    row.appendChild(node);
+    wrap.appendChild(row);
+  }
+  box.appendChild(wrap);
+}
+// ================= قصص قصيرة =================
+let storySel = null, storyPlaying = false;
+
+function storyStop() {
+  storyPlaying = false;
+  try { window.speechSynthesis.cancel(); } catch (e) {}
+}
+
+function openStoriesScreen() {
+  document.querySelectorAll(".screen").forEach(s => s.classList.remove("active"));
+  document.getElementById("sc-stories").classList.add("active");
+  storySel = null;
+  renderStories();
+}
+
+function storyPlayAll(lines, btn) {
+  if (!("speechSynthesis" in window)) return toast("جهازك لا يدعم الصوت");
+  const label = "▶️ تشغيل القصة كاملة";
+  if (storyPlaying) { storyStop(); if (btn) btn.innerText = label; return; }
+  storyPlaying = true;
+  if (btn) btn.innerText = "⏹ إيقاف";
+  let i = 0;
+  const done = () => { storyPlaying = false; if (btn) btn.innerText = label; };
+  const next = () => {
+    if (!storyPlaying || i >= lines.length) return done();
+    const u = new SpeechSynthesisUtterance(lines[i++][0]);
+    u.lang = state.accent || "en-US";
+    u.rate = state.rate || 0.92;
+    u.onend = () => setTimeout(next, 350);
+    u.onerror = done;
+    window.speechSynthesis.speak(u);
+  };
+  window.speechSynthesis.cancel();
+  next();
+}  function renderStories() {
+  const box = document.getElementById("stories-body");
+  if (!box) return;
+  box.innerHTML = "";
+  if (!state.storiesDone) state.storiesDone = {};
+  const list = window.SPEAKORA_STORIES || [];
+  if (!storySel) {
+    if (!list.length) { box.innerHTML = `<div class="card" style="text-align:center;">لا توجد قصص بعد.</div>`; return; }
+    list.forEach(s => {
+      const b = document.createElement("button");
+      b.className = "card";
+      b.style.cssText = "width:100%; text-align:right; cursor:pointer; color:inherit; font:inherit;";
+      const done = !!state.storiesDone[s.id];
+      b.innerHTML = `<strong>📖 ${s.titleAr || s.title}</strong><div style="font-size:0.78rem; color:var(--muted); margin-top:4px;">${s.title} • ${s.level} • ${s.lines.length} جملة ${done ? "• ✓ تمت" : ""}</div>`;
+      b.onclick = () => { storySel = s.id; renderStories(); window.scrollTo(0, 0); };
+      box.appendChild(b);
+    });
+    return;
+  }
+  const s = list.find(x => x.id === storySel);
+  if (!s) { storySel = null; return renderStories(); }
+
+  const head = document.createElement("div");
+  head.className = "card";
+  head.innerHTML = `<strong>📖 ${s.titleAr || s.title}</strong> <button class="mini-btn" id="story-list-btn" style="width:auto; padding:0 10px; border-radius:11px; font-size:0.74rem; float:left;">كل القصص</button>`;
+  box.appendChild(head);
+  head.querySelector("#story-list-btn").onclick = () => { storyStop(); storySel = null; renderStories(); };
+
+  const playBtn = document.createElement("button");
+  playBtn.className = "btn-gold";
+  playBtn.style.marginBottom = "12px";
+  playBtn.innerText = "▶️ تشغيل القصة كاملة";
+  playBtn.onclick = () => storyPlayAll(s.lines, playBtn);
+  box.appendChild(playBtn);
+
+  s.lines.forEach(l => {
+    const d = document.createElement("div");
+    d.className = "card";
+    const row = document.createElement("div");
+    row.className = "en-row";
+    const en = document.createElement("div");
+    en.className = "en-txt";
+    en.textContent = l[0];
+    const acts = document.createElement("div");
+    acts.className = "mini-actions";
+    const p1 = document.createElement("button");
+    p1.className = "mini-btn"; p1.textContent = "🔊";
+    p1.onclick = () => { storyStop(); speak(l[0]); };
+    const p2 = document.createElement("button");
+    p2.className = "mini-btn"; p2.textContent = "🐢";
+    p2.onclick = () => { storyStop(); speak(l[0], 0.62); };
+    acts.appendChild(p1); acts.appendChild(p2);
+    row.appendChild(en); row.appendChild(acts);
+    const ar = document.createElement("div");
+    ar.className = "ar-txt"; ar.textContent = l[1];
+    const ph = document.createElement("div");
+    ph.className = "ph-tag"; ph.textContent = l[2];
+    d.appendChild(row); d.appendChild(ar); d.appendChild(ph); storyMic(l[0], acts, d);
+    box.appendChild(d);
+  });
+  const qTitle = document.createElement("div");
+  qTitle.style.cssText = "font-weight:800; margin:16px 0 8px;";
+  qTitle.textContent = "🎯 أسئلة على القصة";
+  box.appendChild(qTitle);
+  const result = document.createElement("div");
+  result.className = "card";
+  result.style.cssText = "text-align:center; display:none;";
+  const answers = {};
+  let correct = 0, answered = 0;
+  const total = s.questions.length;
+  s.questions.forEach((q, qi) => {
+    const card = document.createElement("div");
+    card.className = "card";
+    const t = document.createElement("div");
+    t.style.marginBottom = "8px";
+    t.innerHTML = `<strong></strong><div style="font-size:0.78rem; color:var(--muted);"></div>`;
+    t.children[0].textContent = q[0];
+    t.children[1].textContent = q[1];
+    card.appendChild(t);
+    const btns = [];
+    q[2].forEach((opt, oi) => {
+      const b = document.createElement("button");
+      b.className = "btn-outline";
+      b.style.cssText = "margin-top:6px; width:100%;";
+      b.textContent = opt;
+      btns.push(b);
+      b.onclick = () => {
+        if (answers[qi] !== undefined) return;
+        answers[qi] = oi; answered++;
+        if (oi === q[3]) { correct++; b.style.borderColor = "var(--success)"; playTone(true); }
+        else { b.style.borderColor = "#ef4444"; btns[q[3]].style.borderColor = "var(--success)"; playTone(false); }
+        if (answered === total) {
+          const passed = correct >= Math.ceil(total * 2 / 3);
+          result.style.display = "block";
+          if (passed) {
+            const first = !state.storiesDone[s.id];
+            state.storiesDone[s.id] = { score: correct, date: new Date().toLocaleDateString("ar-EG") };
+            result.innerHTML = `<strong>أحسنت! ${correct} من ${total} ✓</strong>${first ? `<div class="pill" style="display:inline-flex; padding:6px 14px; margin-top:8px;">⚡ +25 XP</div>` : ""}`;
+            if (first) addXp(25); else saveState();
+          } else {
+            result.innerHTML = `<strong>${correct} من ${total}</strong><div style="margin:6px 0; font-size:0.82rem; color:var(--muted);">اقرأ القصة مرة أخرى وجرب تاني.</div>`;
+            const r = document.createElement("button");
+            r.className = "btn-gold"; r.textContent = "إعادة المحاولة ↻";
+            r.onclick = () => renderStories();
+            result.appendChild(r);
+          }
+        }
+      };
+      card.appendChild(b);
+    });
+    box.appendChild(card);
+  });
+  box.appendChild(result);
+}
+  // ===== تدريب النطق بالميكروفون =====
+  function storyMic(target, acts, card) {
+    const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+    const mic = document.createElement("button");
+    mic.className = "mini-btn"; mic.textContent = "🎤";
+    const out = document.createElement("div");
+    out.style.cssText = "margin-top:8px; font-size:0.95rem; direction:ltr; text-align:left; display:none;";
+    acts.appendChild(mic); card.appendChild(out);
+    const norm = t => (t || "").toLowerCase().replace(/[^a-z0-9' ]+/g, " ").replace(/\s+/g, " ").trim().split(" ").filter(Boolean);
+    mic.onclick = () => {
+      if (!SR) { out.style.display = "block"; out.style.direction = "rtl"; out.style.textAlign = "right"; out.textContent = "المتصفح ده مش بيدعم التسجيل الصوتي. جرّب Chrome على أندرويد أو الكمبيوتر."; return; }
+      try { storyStop(); } catch (e) {}
+      const rec = new SR();
+      rec.lang = "en-US"; rec.interimResults = false; rec.maxAlternatives = 1;
+      mic.textContent = "⏺"; out.style.display = "block"; out.style.direction = "rtl"; out.style.textAlign = "right"; out.textContent = "اتكلم دلوقتي...";
+      rec.onerror = () => { mic.textContent = "🎤"; out.textContent = "ما قدرتش أسمعك. اسمح للميكروفون وجرّب تاني."; };
+      rec.onend = () => { if (mic.textContent === "⏺") { mic.textContent = "🎤"; if (out.textContent === "اتكلم دلوقتي...") out.textContent = "ما سمعتش حاجة. جرّب تاني."; } };
+      rec.onresult = ev => {
+        mic.textContent = "🎤";
+        const said = norm(ev.results[0][0].transcript), want = norm(target);
+        const pool = said.slice();
+        let hit = 0;
+        out.innerHTML = ""; out.style.direction = "ltr"; out.style.textAlign = "left";
+        want.forEach(w => {
+          const k = pool.indexOf(w), sp = document.createElement("span");
+          sp.textContent = w + " ";
+          if (k > -1) { pool.splice(k, 1); hit++; sp.style.color = "#22c55e"; } else { sp.style.color = "#ef4444"; }
+          sp.style.fontWeight = "700";
+          out.appendChild(sp);
+        });
+        const pct = want.length ? Math.round(hit * 100 / want.length) : 0;
+        const sc = document.createElement("div");
+        sc.style.cssText = "direction:rtl; text-align:right; margin-top:4px; font-size:0.85rem;";
+        sc.textContent = (pct >= 80 ? "ممتاز! " : pct >= 50 ? "كويس، حاول تاني. " : "حاول تاني. ") + pct + "% (🎤 للإعادة)";
+        out.appendChild(sc);
+      };
+      try { rec.start(); } catch (e) { mic.textContent = "🎤"; out.textContent = "ما قدرتش أبدأ التسجيل. جرّب تاني."; }
+    };
+  }
+function renderAll() {
+  renderHeader(); renderPath(); renderSentences(); renderRoleplay(); renderCoach(); renderTemplates(); renderDict(); renderProfile();renderJobs();
+}
+
+// ================= 13. ربط الأحداث والتشغيل الأولي =================
+document.getElementById("auth-tab-signup").onclick = () => setAuthMode("signup");
+document.getElementById("auth-tab-login").onclick = () => setAuthMode("login");
+document.getElementById("au-submit").onclick = handleAuthSubmit;
+document.getElementById("pl-start-btn").onclick = startPlacementTest;
+document.getElementById("pl-skip-btn").onclick = () => {
+  state.placementDone = true; state.placementLevel = "A1"; state.currentLevel = "A1";
+  saveState(); document.getElementById("placement-gate").classList.remove("open"); renderAll();
+};
+
+document.querySelectorAll(".n-btn").forEach(btn => {
+  btn.onclick = () => {
+    stopAutoListen();
+    async function loadLeaderboard() {
+  const box = document.getElementById("lb-list");
+  if (!box) return;
+  if (!(useCloud && fbDb && currentUid)) { box.innerText = "سجّل دخول بحساب سحابي عشان تشوف الترتيب."; return; }
+  box.innerText = "جاري التحميل...";
+  try {
+    const snap = await fbDb.collection("leaderboard").orderBy("xp", "desc").limit(20).get();
+    box.innerHTML = "";
+    let i = 0;
+    snap.forEach(doc => {
+      i++;
+      const u = doc.data();
+      const medal = i === 1 ? "🥇" : i === 2 ? "🥈" : i === 3 ? "🥉" : i + ".";
+      const row = document.createElement("div");
+      row.style.cssText = "display:flex; justify-content:space-between; align-items:center; padding:8px 10px; margin-bottom:5px; border-radius:10px; border:1px solid var(--border); background:var(--card-2);" + (doc.id === currentUid ? " border-color:var(--gold);" : "");
+      const left = document.createElement("span");
+      left.textContent = medal + " " + (u.avatar || "🎓") + " " + (u.name || "متعلم");
+      const right = document.createElement("strong");
+      right.style.color = "var(--gold-light)";
+      right.textContent = (u.xp || 0) + " XP";
+      row.appendChild(left); row.appendChild(right);
+      box.appendChild(row);
+    });
+    if (!i) box.innerText = "لسه مفيش حد في الترتيب. اكسب نقاط وهتظهر!";
+  } catch (e) {
+    box.innerText = "تعذر تحميل الترتيب. تأكد من قواعد Firestore.";
+  }
+    }
+    document.querySelectorAll(".n-btn").forEach(b => b.classList.remove("active")); btn.classList.add("active");
+    document.querySelectorAll(".screen").forEach(s => s.classList.remove("active"));
+    document.getElementById("sc-" + btn.dataset.sc).classList.add("active");
+    if (btn.dataset.sc === "profile") { renderProfile(); loadLeaderboard(); }
+    if (btn.dataset.sc === "dict") renderDict();
+  };
+});
+
+document.querySelectorAll("[data-ptab]").forEach(btn => {
+  btn.onclick = () => {
+    document.querySelectorAll("[data-ptab]").forEach(b => b.classList.remove("active")); btn.classList.add("active");
+    ["roleplay", "coach", "templates"].forEach(k => document.getElementById("pane-" + k).style.display = k === btn.dataset.ptab ? "block" : "none");
+  };
+});
+document.querySelectorAll("[data-dtab]").forEach(btn => {
+  btn.onclick = () => {
+    document.querySelectorAll("[data-dtab]").forEach(b => b.classList.remove("active")); btn.classList.add("active");
+    ["mywords", "mistakes"].forEach(k => document.getElementById("pane-" + k).style.display = k === btn.dataset.dtab ? "block" : "none");
+  };
+});
+document.getElementById("open-jobs-btn").onclick = openJobsScreen;
+document.getElementById("jobs-back").onclick = () => {
+  document.querySelectorAll(".screen").forEach(s => s.classList.remove("active"));
+  document.getElementById("sc-path").classList.add("active");
+};
+  document.getElementById("open-stories-btn").onclick = openStoriesScreen;
+document.getElementById("stories-back").onclick = () => {
+  storyStop();
+  document.querySelectorAll(".screen").forEach(s => s.classList.remove("active"));
+  document.getElementById("sc-path").classList.add("active");
+};
+document.getElementById("theme-btn").onclick = () => { state.theme = state.theme === "dark" ? "light" : "dark"; saveState(); renderHeader(); };
+document.getElementById("ov-close").onclick = () => { stopAutoListen(); clearInterval(speedTimer); document.getElementById("overlay").classList.remove("open"); };
+document.getElementById("btn-speed-60").onclick = startSpeedChallenge;
+document.getElementById("btn-retake-placement").onclick = startPlacementTest;
+document.getElementById("sent-auto-btn").onclick = toggleSentenceAutoListen;
+document.getElementById("sent-quiz-btn").onclick = () => {
+  const sents = getAllSentences().filter(s => { const c = s.en.replace(/[.,?!]/g, "").split(/\s+/).filter(Boolean); return c.length >= 4 && c.length <= 10; });
+  if (!sents.length) return toast("لا توجد جمل كافية");
+  launchQuiz({ mode: "sentences", title: "تحدي تركيب الجمل", passPct: 60, xpReward: 40, questions: shuffle(sents).slice(0, 6).map(s => { const c = s.en.replace(/[.,?!]/g, "").split(/\s+/).filter(Boolean); return { type: "build", ar: s.ar, en: c.join(" "), words: shuffle(c) }; }) });
+};
+document.getElementById("rp-reset").onclick = () => { rpStep = 0; rpHist = []; renderRoleplay(); };
+document.getElementById("coach-say").onclick = () => speak(document.getElementById("coach-en").innerText);
+document.getElementById("coach-slow").onclick = () => speak(document.getElementById("coach-en").innerText, 0.62);
+document.getElementById("coach-mic").onclick = startCoachMic;
+document.getElementById("coach-next").onclick = () => { coachIdx++; renderCoach(); };
+
+document.getElementById("open-search-btn").onclick = () => { document.getElementById("search-overlay").classList.add("open"); renderSearch(""); document.getElementById("global-search-inp").focus(); };
+document.getElementById("search-close").onclick = () => document.getElementById("search-overlay").classList.remove("open");
+document.getElementById("global-search-inp").oninput = e => renderSearch(e.target.value);
+
+document.getElementById("open-admin-hdr").onclick = openAdminPanel;
+document.getElementById("open-admin-prof").onclick = openAdminPanel;
+document.getElementById("admin-refresh").onclick = openAdminPanel;
+document.getElementById("admin-close").onclick = () => document.getElementById("admin-overlay").classList.remove("open");
+
+document.getElementById("cw-add").onclick = () => {
+  const en = document.getElementById("cw-en").value.trim(), ar = document.getElementById("cw-ar").value.trim(), ph = document.getElementById("cw-ph").value.trim();
+  if (!en || !ar) return toast("اكتب الكلمة بالإنجليزية وترجمتها");
+  state.customWords.unshift({ en, ar, ph }); saveState();
+  document.getElementById("cw-en").value = ""; document.getElementById("cw-ar").value = ""; document.getElementById("cw-ph").value = "";
+  renderDict(); toast("تم الحفظ في قاموسك ⭐");
+};
+document.getElementById("cw-quiz").onclick = () => {
+  if (state.customWords.length < 4) return toast("أضف 4 كلمات على الأقل");
+  launchQuiz({ mode: "custom", title: "اختبار كلماتي الخاصة", passPct: 70, xpReward: 30, questions: buildWordQuestions(state.customWords, Math.min(10, state.customWords.length), state.customWords) });
+};
+document.getElementById("mistakes-quiz-btn").onclick = () => {
+  if (!state.mistakes.length) return toast("بنك الأخطاء فارغ 🎉");
+  launchQuiz({ mode: "mistakes", title: "تصفية الأخطاء", passPct: 70, xpReward: 25, questions: buildWordQuestions(state.mistakes, Math.min(10, state.mistakes.length), [...state.mistakes, ...getLevelWords("A1")]) });
+};
+
+document.getElementById("accent-us-btn").onclick = () => { state.accent = "en-US"; saveState(); renderProfile(); speak("American accent active."); };
+document.getElementById("accent-gb-btn").onclick = () => { state.accent = "en-GB"; saveState(); renderProfile(); speak("British accent active."); };
+document.getElementById("rate-slider").oninput = e => { state.rate = parseFloat(e.target.value); document.getElementById("rate-lbl").innerText = `${state.rate}x`; saveState(); };
+document.getElementById("toggle-sound-btn").onclick = () => { state.sound = !state.sound; saveState(); renderProfile(); };
+document.getElementById("toggle-free-btn").onclick = () => { state.freeBrowse = !state.freeBrowse; saveState(); renderAll(); toast(state.freeBrowse ? "تم فتح جميع الدروس" : "تم إعادة التسلسل"); };
+
+document.getElementById("backup-export-btn").onclick = () => {
+  try {
+    const a = document.createElement("a");
+    a.href = URL.createObjectURL(new Blob([JSON.stringify(state, null, 2)], { type: "application/json" }));
+    a.download = `speakora-backup-${state.currentLevel}.json`; a.click(); toast("تم تنزيل النسخة الاحتياطية 💾");
+  } catch (e) { toast("تعذر التنزيل هنا"); }
+};
+document.getElementById("backup-import-btn").onclick = () => document.getElementById("import-file-inp").click();
+document.getElementById("import-file-inp").onchange = e => {
+  const f = e.target.files[0]; if (!f) return;
+  const r = new FileReader();
+  r.onload = () => {
+    try {
+      const parsed = JSON.parse(r.result);
+      if (typeof parsed.xp === "number") { state = Object.assign(state, parsed); saveState(); renderAll(); toast("تمت استعادة النسخة الاحتياطية بنجاح ✓"); }
+      else toast("ملف غير صالح");
+    } catch (err) { toast("تعذر قراءة الملف"); }
+  };
+  r.readAsText(f);
+};
+
+document.getElementById("share-progress-wa").onclick = () => {
+  const txt = `🏆 إنجازي على منصة Speakora لتعليم الإنجليزية:\n• المستويات المفتوحة: حتى ${state.currentLevel}\n• الكلمات المتقنة: ${getTotalMastered()} / 1000 كلمة\n• النقاط: ${state.xp} XP ⚡\n• أعلى رقم في تحدي 60 ثانية: ${state.speedBest || 0}\nجرّبها الآن: https://abdonateai92-star.github.io/speakora-/`;
+  window.open("https://wa.me/?text=" + encodeURIComponent(txt), "_blank");
+};
+document.getElementById("cert-share-wa").onclick = () => {
+  const ex = state.passedExams[activeCertLvl];
+  const txt = `🏅 حصلت على شهادة إتمام المستوى ${activeCertLvl} (${LEVEL_META[activeCertLvl].name}) من منصة Speakora بنسبة ${ex ? ex.score : 100}%! 🎉\nhttps://abdonateai92-star.github.io/speakora-/`;
+  window.open("https://wa.me/?text=" + encodeURIComponent(txt), "_blank");
+};
+
+document.getElementById("logout-btn").onclick = async () => {
+  stopAutoListen();
+  if (useCloud && fbAuth) { try { await fbAuth.signOut(); } catch(e){} }
+  localStorage.removeItem("speakora_session_v2");
+  currentUid = null;
+  document.getElementById("auth-gate").classList.add("open");
+};
+
+document.getElementById("reset-all-btn").onclick = () => {
+  if (confirm("هل أنت متأكد من تصفير نقاط ودروس هذا الحساب؟")) {
+    const keep = { name: state.name, email: state.email, avatar: state.avatar };
+    state = createEmptyState(keep.name, keep.email, keep.avatar);
+    saveState(); renderAll(); toast("تم تصفير التقدم");
+  }
+};
+
+// ================= 14. التشغيل الأولي =================
+initAuthUI();
+if (useCloud && fbAuth) {
+  fbAuth.onAuthStateChanged(async user => {
+    if (user) {
+      currentUid = user.uid;
+      const snap = await fbDb.collection("users").doc(user.uid).get();
+      state = snap.exists ? Object.assign(createEmptyState("", user.email), snap.data()) : createEmptyState(user.email.split("@")[0], user.email);
+      enterAfterAuth();
+    } else {
+      document.getElementById("auth-gate").classList.add("open");
+    }
+  });
+} else {
+  const sess = localStorage.getItem("speakora_session_v2");
+  const accs = getLocalAccounts();
+  if (false && sess && accs[sess]) {
+    state = Object.assign(createEmptyState(), accs[sess].data);
+    enterAfterAuth();
+  } else {
+    document.getElementById("auth-gate").classList.add("open");
+  }
+}
+</script>
+
+<!-- ==================== SPEAKORA PRO TRAINING LAB ==================== -->
+<style>
+  body:has(.gate.open) #sp-pro-fab { display: none !important; }
+  #sp-pro-fab {
+    position: fixed;
+    bottom: 72px;
+    left: 14px;
+    z-index: 9998;
+    background: linear-gradient(135deg, #2563eb, #7c3aed);
+    color: #fff;
+    border: none;
+    border-radius: 50px;
+    padding: 10px 16px;
+    font-size: 13px;
+    font-weight: bold;
+    box-shadow: 0 8px 20px rgba(37, 99, 235, 0.4);
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-family: system-ui, -apple-system, sans-serif;
+  }
+  #sp-pro-modal {
+    display: none;
+    position: fixed;
+    inset: 0;
+    z-index: 9999;
+    background: #0f172a;
+    color: #f8fafc;
+    overflow-y: auto;
+    padding: 16px;
+    font-family: system-ui, -apple-system, sans-serif;
+    direction: rtl;
+  }
+  .sp-pro-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-bottom: 1px solid #1e293b;
+    padding-bottom: 12px;
+    margin-bottom: 12px;
+  }
+  .sp-pro-streak-bar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background: #172554;
+    border: 1px solid #1d4ed8;
+    border-radius: 12px;
+    padding: 10px 14px;
+    margin-bottom: 14px;
+    font-size: 13px;
+  }
+  .sp-pro-close {
+    background: #ef4444;
+    color: #fff;
+    border: none;
+    border-radius: 8px;
+    padding: 6px 14px;
+    font-weight: bold;
+    cursor: pointer;
+  }
+  .sp-pro-tabs {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 8px;
+    margin-bottom: 16px;
+  }
+  .sp-pro-tab {
+    background: #1e293b;
+    color: #cbd5e1;
+    border: 1px solid #334155;
+    border-radius: 10px;
+    padding: 10px 8px;
+    font-size: 13px;
+    font-weight: bold;
+    cursor: pointer;
+    text-align: center;
+  }
+  .sp-pro-tab.active {
+    background: #2563eb;
+    color: #fff;
+    border-color: #60a5fa;
+  }
+  .sp-pro-card {
+    background: #1e293b;
+    border: 1px solid #334155;
+    border-radius: 14px;
+    padding: 16px;
+    margin-bottom: 14px;
+  }
+  .sp-pro-en {
+    direction: ltr;
+    text-align: left;
+    font-size: 18px;
+    font-weight: bold;
+    color: #38bdf8;
+    margin: 10px 0;
+    line-height: 1.5;
+  }
+  .sp-pro-ar {
+    font-size: 15px;
+    color: #e2e8f0;
+    margin-bottom: 12px;
+  }
+  .sp-pro-btn {
+    background: #2563eb;
+    color: #fff;
+    border: none;
+    border-radius: 8px;
+    padding: 10px 14px;
+    font-size: 13px;
+    font-weight: bold;
+    cursor: pointer;
+    margin: 4px;
+  }
+  .sp-pro-btn.sec { background: #475569; }
+  .sp-pro-btn.warn { background: #d97706; }
+  .sp-pro-btn.ok { background: #059669; }
+  .sp-pro-choice {
+    display: block;
+    width: 100%;
+    text-align: left;
+    direction: ltr;
+    background: #0f172a;
+    color: #f8fafc;
+    border: 1px solid #334155;
+    border-radius: 10px;
+    padding: 12px;
+    margin: 8px 0;
+    cursor: pointer;
+    font-size: 14px;
+  }
+  .sp-pro-choice:hover { border-color: #38bdf8; }
+  .sp-badge {
+    display: inline-block;
+    background: #334155;
+    color: #fbbf24;
+    padding: 3px 8px;
+    border-radius: 6px;
+    font-size: 12px;
+    margin-bottom: 6px;
+  }
+  .sp-sponsor-box {
+    margin-top: 16px;
+    background: #111827;
+    border: 1px dashed #475569;
+    border-radius: 12px;
+    padding: 12px;
+    text-align: center;
+    font-size: 12px;
+    color: #94a3b8;
+  }
+</style>
+
+<button id="sp-pro-fab" onclick="spProOpen()">⚡ معمل التدريب B2</button>
+
+<div id="sp-pro-modal">
+  <div class="sp-pro-header">
+    <h3 style="margin:0;font-size:17px;">🚀 Speakora Pro Lab</h3>
+    <button class="sp-pro-close" onclick="spProClose()">إغلاق ✕</button>
+  </div>
+
+  <div class="sp-pro-streak-bar">
+    <span>🔥 استمراريتك اليومية: <strong id="sp-streak-days">1</strong> يوم</span>
+    <button class="sp-pro-btn ok" style="margin:0;padding:6px 10px;font-size:12px;" onclick="spShareProgress()">📤 مشاركة تقدمي</button>
+  </div>
+
+  <div class="sp-pro-tabs">
+    <button class="sp-pro-tab active" onclick="spProTab('shadow', this)">🎙️ التحدث والتكرار</button>
+    <button class="sp-pro-tab" onclick="spProTab('dialogue', this)">💬 محاكي الحوارات</button>
+    <button class="sp-pro-tab" onclick="spProTab('linking', this)">🔗 بناء الجملة بالروابط</button>
+    <button class="sp-pro-tab" onclick="spProTab('mistakes', this)">⚠️ أخطاء شائعة</button>
+    <button class="sp-pro-tab" onclick="spProTab('vault', this)">🧠 خزنة الأخطاء (<span id="sp-vault-count">0</span>)</button>
+  </div>
+
+  <div id="sp-pro-body"></div>
+
+  <div class="sp-sponsor-box" id="sp-sponsor-slot">
+    مساحة مخصصة للرعاية أو العروض التدريبية على منصة Speakora
+  </div>
+</div>
+
+<script>
+(function() {
+  const SITE_URL = "https://abdonateai92-star.github.io/speakora-/";
+
+  const baseSentences = [
+    { en: "I usually wake up early because I like to organize my day.", ar: "عادة أستيقظ مبكراً لأنني أحب تنظيم يومي.", level: "A2", link: "because" },
+    { en: "Although the shift was busy, everything went smoothly.", ar: "بالرغم من أن الوردية كانت مزدحمة، سار كل شيء بسلاسة.", level: "B1", link: "Although" },
+    { en: "I am practicing English every day so that I can speak fluently.", ar: "أتدرب على الإنجليزية يومياً لكي أتمكن من التحدث بطلاقة.", level: "B1", link: "so that" },
+    { en: "Actually, I prefer having strong coffee before starting my work.", ar: "في الواقع، أفضل شرب قهوة قوية قبل بدء عملي.", level: "B1", link: "Actually" },
+    { en: "Even though it was challenging at first, I adapted quickly.", ar: "على الرغم من أنه كان صعباً في البداية، تأقلمت بسرعة.", level: "B2", link: "Even though" },
+    { en: "On the other hand, working with a supportive team makes a big difference.", ar: "من ناحية أخرى، العمل مع فريق متعاون يصنع فرقاً كبيراً.", level: "B2", link: "On the other hand" },
+    { en: "Could you let me know as soon as the supplies arrive?", ar: "هل يمكنك إعلامي بمجرد وصول المستلزمات؟", level: "B2", link: "as soon as" },
+    { en: "In my free time, I enjoy watching movies and building web apps.", ar: "في وقت فراغي، أستمتع بمشاهدة الأفلام وبناء تطبيقات الويب.", level: "B1", link: "In my free time" }
+  ];
+
+  const dialogues = [
+    {
+      title: "موقف 1: نقاش حول سير العمل والانضباط",
+      npc: "Good morning! How is everything going with today's schedule?",
+      npcAr: "صباح الخير! كيف تسير الأمور مع جدول اليوم؟",
+      options: [
+        { text: "Good.", quality: "مختصر جداً (A1)", reply: "Alright, let me know if you need anything.", tip: "حاول استخدام جملة كاملة مع أداة ربط لتبدو أكثر احترافية." },
+        { text: "Everything is on track, although we had a busy morning.", quality: "ممتاز وطبيعي (B2)", reply: "Great job handling the rush! Keep me updated.", tip: "رائع! استخدام although ربط الفكرتين بطلاقة وثقة." },
+        { text: "Yes, schedule is finish and all good.", quality: "يحتاج تصحيح قواعد (A2)", reply: "Okay, thanks for the update.", tip: "الأصح: The schedule is finished, and everything is going well." }
+      ]
+    },
+    {
+      title: "موقف 2: التحدث عن أهدافك وتطوير نفسك",
+      npc: "What have you been working on lately outside of work?",
+      npcAr: "ما الذي تعمل عليه مؤخراً خارج نطاق العمل؟",
+      options: [
+        { text: "I have been practicing English daily because I want to reach B2 level.", quality: "قوي جداً (B2)", reply: "That's impressive! Consistency is the key to fluency.", tip: "استخدام المضارع التام المستمر مع because يعطي انطباعاً قوياً جداً." },
+        { text: "I study English and make website.", quality: "بسيط (A1)", reply: "Nice hobbies!", tip: "يمكنك تطويرها إلى: I'm learning English and building web apps in my free time." }
+      ]
+    }
+  ];
+
+  const linkingDrills = [
+    {
+      idea1: "I was tired.",
+      idea2: "I finished my daily English practice.",
+      ar: "كنت متعباً، ومع ذلك أنهيت تدريبي اليومي على الإنجليزية.",
+      choices: ["Although I was tired, I finished my daily English practice.", "Because I was tired, I finished my daily English practice.", "I was tired so I finished my daily English practice."],
+      correct: 0,
+      explain: "نستخدم Although للتعبير عن التناقض (رغم التعب، أكملت التدريب)."
+    },
+    {
+      idea1: "We need to check the inventory.",
+      idea2: "We don't run out of supplies.",
+      ar: "نحتاج لمراجعة المخزون حتى لا تنفد منا المستلزمات.",
+      choices: ["We need to check the inventory however we don't run out of supplies.", "We need to check the inventory so that we don't run out of supplies.", "Although we need to check the inventory, we don't run out of supplies."],
+      correct: 1,
+      explain: "نستخدم so that لبيان الهدف أو الغرض (لكي / حتى لا)."
+    },
+    {
+      idea1: "Learning new words is useful.",
+      idea2: "Using them in full sentences is even more important.",
+      ar: "تعلم كلمات جديدة مفيد، ومن ناحية أخرى استخدامها في جمل كاملة أهم.",
+      choices: ["Learning new words is useful; on the other hand, using them in full sentences is even more important.", "Learning new words is useful because using them in full sentences is important.", "Learning new words is useful unless using them in full sentences is important."],
+      correct: 0,
+      explain: "On the other hand ممتازة في مستوى B2 للمقارنة وإضافة وجهة نظر مكملة."
+    }
+  ];
+
+  const commonMistakes = [
+    {
+      wrong: "I am agree with you.",
+      right: "I agree with you.",
+      ar: "أتفق معك — كلمة agree فعل ولا تُسبق بـ am.",
+      level: "A2"
+    },
+    {
+      wrong: "I have 26 years.",
+      right: "I am 26 years old.",
+      ar: "عمري 26 عاماً — في الإنجليزية نستخدم verb to be للعمر وليس have.",
+      level: "A1"
+    },
+    {
+      wrong: "Although it was raining, but I went out.",
+      right: "Although it was raining, I went out.",
+      ar: "رغم أنها كانت تمطر، خرجت — لا نجمع بين Although و but في نفس الجملة.",
+      level: "B1/B2"
+    }
+  ];
+
+  let currentIdx = 0;
+  let showAr = true;
+  let timerId = null;
+  let vault = JSON.parse(localStorage.getItem('speakora_vault_v1') || '[]');
+
+  function initStreak() {
+    const today = new Date().toISOString().slice(0, 10);
+    let streak = parseInt(localStorage.getItem('speakora_streak_days') || '1', 10);
+    const lastDay = localStorage.getItem('speakora_last_day');
+    if (!lastDay) {
+      localStorage.setItem('speakora_last_day', today);
+      localStorage.setItem('speakora_streak_days', String(streak));
+    } else if (lastDay !== today) {
+      const prev = new Date(lastDay);
+      const curr = new Date(today);
+      const diffDays = Math.round((curr - prev) / (1000 * 60 * 60 * 24));
+      streak = diffDays === 1 ? streak + 1 : 1;
+      localStorage.setItem('speakora_last_day', today);
+      localStorage.setItem('speakora_streak_days', String(streak));
+    }
+    const el = document.getElementById('sp-streak-days');
+    if (el) el.textContent = streak;
+    return streak;
+  }
+
+  function updateVaultBadge() {
+    const el = document.getElementById('sp-vault-count');
+    if (el) el.textContent = vault.length;
+  }
+
+  window.spShareProgress = function() {
+    const streak = initStreak();
+    const msg = `أتدرب على الإنجليزية حتى مستوى B2 عبر منصة Speakora 🚀\n🔥 الاستمرارية: ${streak} يوم | 🧠 جمل للمراجعة: ${vault.length}\nجرّبها من هنا: ${SITE_URL}`;
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+      navigator.clipboard.writeText(msg).then(() => {
+        alert('تم نسخ رسالة التقدم ورابط Speakora! يمكنك لصقها ومشاركتها الآن.');
+      }).catch(() => {
+        prompt('انسخ النص التالي للمشاركة:', msg);
+      });
+    } else {
+      prompt('انسخ النص التالي للمشاركة:', msg);
+    }
+  };
+
+  window.spProSpeak = function(text) {
+    if (!('speechSynthesis' in window)) return alert('المتصفح لا يدعم النطق الصوتي');
+    window.speechSynthesis.cancel();
+    const u = new SpeechSynthesisUtterance(text);
+    u.lang = 'en-US';
+    u.rate = 0.92;
+    window.speechSynthesis.speak(u);
+  };
+
+  window.spProOpen = function() {
+    document.getElementById('sp-pro-modal').style.display = 'block';
+    initStreak();
+    updateVaultBadge();
+    renderShadow();
+  };
+
+  window.spProClose = function() {
+    clearInterval(timerId);
+    document.getElementById('sp-pro-modal').style.display = 'none';
+  };
+
+  window.spProTab = function(tab, btn) {
+    clearInterval(timerId);
+    document.querySelectorAll('.sp-pro-tab').forEach(b => b.classList.remove('active'));
+    if (btn) btn.classList.add('active');
+    if (tab === 'shadow') renderShadow();
+    if (tab === 'dialogue') renderDialogue();
+    if (tab === 'linking') renderLinking();
+    if (tab === 'mistakes') renderMistakes();
+    if (tab === 'vault') renderVault();
+  };
+
+  function renderShadow() {
+    const item = baseSentences[currentIdx % baseSentences.length];
+    document.getElementById('sp-pro-body').innerHTML = `
+      <div class="sp-pro-card">
+        <span class="sp-badge">المستوى: ${item.level} | الرابط: ${item.link}</span>
+        <div class="sp-pro-en">${item.en}</div>
+        <div class="sp-pro-ar" style="display:${showAr ? 'block' : 'none'}">${item.ar}</div>
+        <div id="sp-shadow-status" style="color:#fbbf24;font-size:13px;margin:8px 0;">اضغط "ابدأ التكرار الصوتي" واسمع ثم كرر بصوت عالي</div>
+        <button class="sp-pro-btn" onclick="spStartShadow()">🎙️ ابدأ التكرار الصوتي (4 ثوانٍ)</button>
+        <button class="sp-pro-btn sec" onclick="spToggleAr()">👁️ ${showAr ? 'إخفاء' : 'إظهار'} الترجمة</button>
+        <button class="sp-pro-btn warn" onclick="spSaveToVault(${currentIdx % baseSentences.length})">⭐ حفظ في خزنة الأخطاء</button>
+        <button class="sp-pro-btn ok" onclick="spNextShadow()">التالي ⬅️</button>
+      </div>
+    `;
+  }
+
+  window.spStartShadow = function() {
+    clearInterval(timerId);
+    const item = baseSentences[currentIdx % baseSentences.length];
+    const status = document.getElementById('sp-shadow-status');
+    status.textContent = "🔊 استمع جيداً...";
+    spProSpeak(item.en);
+    setTimeout(() => {
+      let sec = 4;
+      status.textContent = "🗣️ دورك الآن! انطق الجملة بصوت عالي (" + sec + " ثوانٍ)";
+      timerId = setInterval(() => {
+        sec--;
+        if (sec > 0) {
+          status.textContent = "🗣️ دورك الآن! انطق الجملة بصوت عالي (" + sec + " ثوانٍ)";
+        } else {
+          clearInterval(timerId);
+          status.textContent = "✅ ممتاز! يمكنك الإعادة أو الانتقال للجملة التالية.";
+        }
+      }, 1000);
+    }, 2200);
+  };
+
+  window.spToggleAr = function() {
+    showAr = !showAr;
+    renderShadow();
+  };
+
+  window.spNextShadow = function() {
+    clearInterval(timerId);
+    currentIdx++;
+    renderShadow();
+  };
+
+  window.spSaveToVault = function(idx) {
+    const item = baseSentences[idx];
+    if (!vault.some(v => v.en === item.en)) {
+      vault.push({ ...item, addedAt: new Date().toLocaleDateString('ar-EG') });
+      localStorage.setItem('speakora_vault_v1', JSON.stringify(vault));
+      updateVaultBadge();
+      alert('تمت إضافة الجملة إلى خزنة المراجعة الذكية!');
+    } else {
+      alert('هذه الجملة موجودة بالفعل في خزنتك.');
+    }
+  };
+
+  function renderDialogue() {
+    let html = '';
+    dialogues.forEach((d, dIdx) => {
+      html += `
+        <div class="sp-pro-card">
+          <span class="sp-badge">${d.title}</span>
+          <div class="sp-pro-en">"${d.npc}"</div>
+          <div class="sp-pro-ar">${d.npcAr}</div>
+          <button class="sp-pro-btn sec" onclick="spProSpeak('${d.npc.replace(/'/g, "\\'")}')">🔊 اسمع السؤال</button>
+          <div style="margin-top:10px;">
+            ${d.options.map((opt, oIdx) => `
+              <button class="sp-pro-choice" onclick="spPickDialogue(${dIdx}, ${oIdx})">${opt.text}</button>
+            `).join('')}
+          </div>
+          <div id="sp-diag-res-${dIdx}" style="margin-top:10px;"></div>
+        </div>
+      `;
+    });
+    document.getElementById('sp-pro-body').innerHTML = html;
+  }
+
+  window.spPickDialogue = function(dIdx, oIdx) {
+    const opt = dialogues[dIdx].options[oIdx];
+    spProSpeak(opt.reply);
+    document.getElementById('sp-diag-res-' + dIdx).innerHTML = `
+      <div style="background:#0f172a;padding:12px;border-radius:10px;border-right:4px solid #10b981;">
+        <div style="color:#34d399;font-weight:bold;margin-bottom:4px;">التقييم: ${opt.quality}</div>
+        <div style="direction:ltr;text-align:left;color:#38bdf8;margin-bottom:6px;">الرد: "${opt.reply}"</div>
+        <div style="font-size:13px;color:#cbd5e1;">💡 ${opt.tip}</div>
+      </div>
+    `;
+  };
+
+  function renderLinking() {
+    let html = '';
+    linkingDrills.forEach((dr, idx) => {
+      html += `
+        <div class="sp-pro-card">
+          <span class="sp-badge">تحدي ربط الأفكار #${idx + 1}</span>
+          <div class="sp-pro-ar">المعنى المطلوب: <strong>${dr.ar}</strong></div>
+          <div style="direction:ltr;text-align:left;color:#94a3b8;font-size:13px;margin-bottom:8px;">
+            1) ${dr.idea1}<br>2) ${dr.idea2}
+          </div>
+          ${dr.choices.map((ch, cIdx) => `
+            <button class="sp-pro-choice" onclick="spCheckLink(${idx}, ${cIdx})">${ch}</button>
+          `).join('')}
+          <div id="sp-link-res-${idx}" style="margin-top:8px;"></div>
+        </div>
+      `;
+    });
+    document.getElementById('sp-pro-body').innerHTML = html;
+  }
+
+  window.spCheckLink = function(idx, cIdx) {
+    const dr = linkingDrills[idx];
+    const ok = cIdx === dr.correct;
+    if (ok) spProSpeak(dr.choices[cIdx]);
+    document.getElementById('sp-link-res-' + idx).innerHTML = `
+      <div style="padding:10px;border-radius:8px;background:${ok ? '#064e3b' : '#7f1d1d'};color:#fff;font-size:13px;">
+        ${ok ? '✅ إجابة صحيحة وممتازة!' : '❌ جرب رابطاً أدق للمعنى.'}<br>${dr.explain}
+      </div>
+    `;
+  };
+
+  function renderMistakes() {
+    let html = '';
+    commonMistakes.forEach((m) => {
+      html += `
+        <div class="sp-pro-card">
+          <span class="sp-badge">مستوى ${m.level}</span>
+          <div style="direction:ltr;text-align:left;color:#f87171;text-decoration:line-through;font-size:15px;margin:6px 0;">${m.wrong}</div>
+          <div style="direction:ltr;text-align:left;color:#34d399;font-weight:bold;font-size:17px;margin:6px 0;">${m.right}</div>
+          <div class="sp-pro-ar">${m.ar}</div>
+          <button class="sp-pro-btn" onclick="spProSpeak('${m.right.replace(/'/g, "\\'")}')">🔊 اسمع الصحيح</button>
+        </div>
+      `;
+    });
+    document.getElementById('sp-pro-body').innerHTML = html;
+  }
+
+  function renderVault() {
+    if (!vault.length) {
+      document.getElementById('sp-pro-body').innerHTML = `
+        <div class="sp-pro-card">
+          <p>خزنة الأخطاء فارغة حالياً. من تبويب <strong>"التحدث والتكرار"</strong> اضغط على <strong>"⭐ حفظ في خزنة الأخطاء"</strong> لأي جملة صعبة عشان تراجعها هنا.</p>
+        </div>
+      `;
+      return;
+    }
+    let html = '';
+    vault.forEach((v, idx) => {
+      html += `
+        <div class="sp-pro-card">
+          <span class="sp-badge">${v.level} | أُضيفت: ${v.addedAt}</span>
+          <div class="sp-pro-en">${v.en}</div>
+          <div class="sp-pro-ar">${v.ar}</div>
+          <button class="sp-pro-btn" onclick="spProSpeak('${v.en.replace(/'/g, "\\'")}')">🔊 نطق</button>
+          <button class="sp-pro-btn ok" onclick="spRemoveVault(${idx})">✅ أتقنتها (حذف)</button>
+        </div>
+      `;
+    });
+    document.getElementById('sp-pro-body').innerHTML = html;
+  }
+
+  window.spRemoveVault = function(idx) {
+    vault.splice(idx, 1);
+    localStorage.setItem('speakora_vault_v1', JSON.stringify(vault));
+    updateVaultBadge();
+    renderVault();
+  };
+
+  initStreak();
+  updateVaultBadge();
+})();
+</script>
+<!-- ==================== END SPEAKORA PRO TRAINING LAB ==================== -->
+<script src="paywall.js"></script>
+<script src="vault.js"></script>
