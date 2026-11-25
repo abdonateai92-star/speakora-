@@ -147,16 +147,11 @@
       alert("تم تثبيت " + n + " حساب ✅");
     } catch (e) { alert("فشل: " + (e && e.message || e)); }
   }
-  var box = null;
   function adminUi(user) {
     var isAdm = user && (user.email || "").toLowerCase() === ADMIN;
-    if (!isAdm) { if (box) { box.remove(); box = null; } return; }
-    if (box) return;
-    box = el("div", "position:fixed;bottom:44px;left:8px;z-index:2147482000;display:flex;flex-direction:column;gap:6px");
-    function b(t, f) { var x = el("button", "background:#1e293b;color:#fde68a;border:1px solid #d4af37;border-radius:20px;padding:6px 12px;font-size:0.76rem;font-weight:bold;cursor:pointer", t); x.onclick = f; box.appendChild(x); }
-    b("☁️ رفع الدروس", upload);
-    b("🛡️ تثبيت الحسابات القديمة", grandfather);
-    document.body.appendChild(box);
+    if (!isAdm || !window.__spAdminMenu) return;
+    window.__spAdminMenu.add("vault-upload", "☁️ رفع الدروس", upload);
+    window.__spAdminMenu.add("vault-gf", "🛡️ تثبيت الحسابات القديمة", grandfather);
   }
   fbA.onAuthStateChanged(adminUi);
   window.__spVault = { collect: collect, wipe: wipe, apply: apply };
