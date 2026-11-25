@@ -50,6 +50,34 @@
   try { fbA = fbAuth; fbD = fbDb; } catch (e) { return; }
   if (!fbA || !fbD) return;
 
+  // One small admin toggle (never over the bottom nav). Buttons from paywall.js and vault.js live in its panel.
+  window.__spAdminMenu = window.__spAdminMenu || (function () {
+    var fab = null, panel = null;
+    function build() {
+      if (fab) return;
+      fab = document.createElement("button");
+      fab.textContent = "⚙️";
+      fab.setAttribute("aria-label", "admin");
+      fab.style.cssText = "position:fixed;left:8px;bottom:calc(env(safe-area-inset-bottom,0px) + 100px);z-index:2147482000;width:34px;height:34px;border-radius:50%;border:1px solid #d4af37;background:#1e293b;color:#fde68a;font-size:16px;line-height:1;padding:0;cursor:pointer;opacity:0.85;";
+      panel = document.createElement("div");
+      panel.style.cssText = "position:fixed;left:8px;bottom:calc(env(safe-area-inset-bottom,0px) + 140px);z-index:2147482000;display:none;flex-direction:column;gap:6px;";
+      fab.onclick = function () { panel.style.display = panel.style.display === "none" ? "flex" : "none"; };
+      document.body.appendChild(panel); document.body.appendChild(fab);
+    }
+    return {
+      add: function (id, label, fn) {
+        build();
+        if (panel.querySelector('[data-id="' + id + '"]')) return;
+        var b = document.createElement("button");
+        b.setAttribute("data-id", id); b.textContent = label;
+        b.style.cssText = "background:#1e293b;color:#fde68a;border:1px solid #d4af37;border-radius:20px;padding:7px 12px;font-size:0.76rem;font-weight:bold;cursor:pointer;white-space:nowrap";
+        b.onclick = function () { panel.style.display = "none"; fn(); };
+        panel.appendChild(b);
+      },
+      clear: function () { if (fab) { fab.remove(); panel.remove(); fab = null; panel = null; } }
+    };
+  })();
+
   var overlayEl = null, pillEl = null, adminBtn = null, timer = null, watch = null, busy = false;
   var cur = null; // current access decision, null = no restriction
   var lastCfg = {}, lastUser = null;
@@ -175,8 +203,8 @@
 
   function showAdminBtn() {
     if (adminBtn) return;
-    adminBtn = el("button", "position:fixed;bottom:8px;left:8px;z-index:2147482000;background:#d4af37;color:#111;border:0;border-radius:20px;padding:6px 12px;font-size:0.78rem;font-weight:bold;cursor:pointer", "💳 تفعيل مستوى");
-    adminBtn.onclick = function () {
+    adminBtn = true;
+    window.__spAdminMenu.add("pw-unlock", "💳 تفعيل مستوى", function () {
       var email = (prompt("اكتب إيميل المشترك:") || "").trim().toLowerCase();
       if (!email) return;
       var lv = (prompt("اكتب المستويات مفصولة بفاصلة، مثال: A1 أو A1,B1") || "").toUpperCase().split(/[\s,،]+/).filter(Boolean);
@@ -197,15 +225,14 @@
           });
         });
       }).catch(function (e) { alert("فشل: " + (e && e.message || e)); });
-    };
-    document.body.appendChild(adminBtn);
+    });
   }
 
   async function evaluate(user) {
     if (busy) return; busy = true;
     try {
       clearUi();
-      if (!user) { if (adminBtn) { adminBtn.remove(); adminBtn = null; } return; }
+      if (!user) { if (adminBtn) { window.__spAdminMenu.clear(); adminBtn = null; } return; }
       var cfg = {};
       try { var c = await fbD.collection("paywall_config").doc("main").get(); cfg = c.exists ? c.data() : {}; }
       catch (e) { console.warn("paywall: config unreadable, staying open", e); return; }
