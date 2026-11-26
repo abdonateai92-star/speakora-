@@ -22,6 +22,15 @@
     wrap.appendChild(box); document.body.appendChild(wrap);
     wrap.addEventListener("click", function (e) { if (e.target === wrap) wrap.remove(); });
     box.appendChild(el("div", "font-weight:800;font-size:1.1rem;", "⚙️ إعدادات الاشتراك والتجربة"));
+    var ub = el("button", "margin:8px 0;padding:10px 12px;border-radius:10px;border:1px solid #d4af37;background:#0f172a;color:#d4af37;width:100%;font-weight:700;", "👥 إدارة المستخدمين (بحث، فتح مستوى، إيقاف)");
+    ub.onclick = function () {
+      if (window.__spAdminUsers) return window.__spAdminUsers.open();
+      var s = document.createElement("script"); s.charset = "utf-8"; s.src = "admin_users.js?v=1";
+      s.onload = function () { if (window.__spAdminUsers) window.__spAdminUsers.open(); };
+      s.onerror = function () { alert("تعذر تحميل admin_users.js"); };
+      document.head.appendChild(s);
+    };
+    box.appendChild(ub);
     var st = el("div", "font-size:.85rem;margin:6px 0;color:#fde68a;", "جاري التحميل...");
     box.appendChild(st);
     var cfg = {};
