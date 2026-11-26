@@ -171,7 +171,8 @@ load();var sc=document.createElement("script");sc.src="chat-scripts.js";sc.onloa
     var allowed = activeLevels(i.sub, i.now);
     var ts = i.sub && Number(i.sub.trialStart) || 0;
     if (!ts) return { action: "starttrial", allowed: allowed };
-    var left = ts + TRIAL_MS - i.now;
+    var th = Number(cfg.trialHours); var tms = (th > 0 && th <= 720) ? th * 3600000 : TRIAL_MS;
+    var left = ts + tms - i.now;
     if (left > 0) {
       var tl = Array.isArray(cfg.trialLevels) && cfg.trialLevels.length ? cfg.trialLevels : ["A1"];
       tl.forEach(function (l) { if (LEVELS.indexOf(l) >= 0 && allowed.indexOf(l) < 0) allowed.push(l); });
@@ -419,7 +420,7 @@ load();var sc=document.createElement("script");sc.src="chat-scripts.js";sc.onloa
       // schedule re-check at next expiry
       var next = Infinity, until = (base.sub && base.sub.until) || {};
       allowed.forEach(function (l) { var u = Number(until[l]) || 0; if (u > base.now && u < next) next = u; });
-      if (d.trial) { window.__spTrialLessons = 10; window.__spTrialLock = function () { showOverlay(function (b) { b.appendChild(el("div", "font-size:2.2rem", "🔒")); b.appendChild(el("h2", "margin:6px 0", "التجربة المجانية: أول ١٠ دروس")); b.appendChild(el("p", "font-size:0.9rem", "باقي دروس A1 للمشتركين. اشترك في المستوى A1 لفتحها كلها.")); payBox(b, user, cfg, "A1"); b.appendChild(btn("↩️ رجوع للدروس", "#7c3aed", function () { if (overlayEl) { overlayEl.remove(); overlayEl = null; } })); }, true); }; showPill(d.leftMs, "⏳ التجربة المجانية (A1، ١٢ ساعة أو ١٠ دروس):"); }
+      if (d.trial) { var tlN = Number(cfg.trialLessons); tlN = (tlN >= 1 && tlN <= 200) ? Math.floor(tlN) : 10; var thN = Number(cfg.trialHours); thN = (thN > 0 && thN <= 720) ? thN : 12; window.__spTrialLessons = tlN; window.__spTrialLock = function () { showOverlay(function (b) { b.appendChild(el("div", "font-size:2.2rem", "🔒")); b.appendChild(el("h2", "margin:6px 0", "التجربة المجانية: أول " + tlN + " دروس")); b.appendChild(el("p", "font-size:0.9rem", "باقي دروس A1 للمشتركين. اشترك في المستوى A1 لفتحها كلها.")); payBox(b, user, cfg, "A1"); b.appendChild(btn("↩️ رجوع للدروس", "#7c3aed", function () { if (overlayEl) { overlayEl.remove(); overlayEl = null; } })); }, true); }; showPill(d.leftMs, "⏳ التجربة المجانية (A1، " + thN + " ساعة أو " + tlN + " دروس):"); }
       else if (next < Infinity && next - base.now < 2147000000) timer = setTimeout(function () { evaluate(fbA.currentUser); }, next - base.now + 1000);
       if (!allowed.length) { showNone(user, cfg, !d.trial); return; }
       startWatch(user, cfg, allowed);

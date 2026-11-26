@@ -228,6 +228,13 @@
   function adminUi(user) {
     var isAdm = user && (user.email || "").toLowerCase() === ADMIN;
     if (!isAdm || !window.__spAdminMenu) return;
+    window.__spAdminMenu.add("admin-settings", "⚙️ الإعدادات", function () {
+      if (window.__spAdminSettings) return window.__spAdminSettings.open();
+      var s = document.createElement("script"); s.src = "admin.js?v=1";
+      s.onload = function () { if (window.__spAdminSettings) window.__spAdminSettings.open(); };
+      s.onerror = function () { alert("تعذر تحميل admin.js"); };
+      document.head.appendChild(s);
+    });
     window.__spAdminMenu.add("vault-upload", "☁️ رفع الدروس", upload);
     window.__spAdminMenu.add("vault-tracks", "📥 رفع ملف المسارات", pickTracksFile);
     window.__spAdminMenu.add("vault-gf", "🛡️ تثبيت الحسابات القديمة", grandfather);
