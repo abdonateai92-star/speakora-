@@ -40,6 +40,15 @@
       document.head.appendChild(s);
     };
     box.appendChild(cb);
+    var ab = el("button", "margin:0 0 8px;padding:10px 12px;border-radius:10px;border:1px solid #d4af37;background:#0f172a;color:#d4af37;width:100%;font-weight:700;", "📢 الإعلانات");
+    ab.onclick = function () {
+      if (window.__spAdminAnnounce) return window.__spAdminAnnounce.open();
+      var s = document.createElement("script"); s.charset = "utf-8"; s.src = "admin_announce.js?v=1";
+      s.onload = function () { if (window.__spAdminAnnounce) window.__spAdminAnnounce.open(); };
+      s.onerror = function () { alert("تعذر تحميل admin_announce.js"); };
+      document.head.appendChild(s);
+    };
+    box.appendChild(ab);
     var st = el("div", "font-size:.85rem;margin:6px 0;color:#fde68a;", "جاري التحميل...");
     box.appendChild(st);
     var cfg = {};
