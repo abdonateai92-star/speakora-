@@ -650,6 +650,8 @@ body.light .n-btn.active { color: var(--gold-dark); }
       <div class="stat-box"><div class="stat-num" id="st-certs">0 / 4</div><div class="stat-lbl">شهادات المستويات</div></div>
     </div>
 
+    <button class="btn-outline" id="share-app-btn" style="margin-bottom:12px;" onclick="spShareApp()">🔗 مشاركة التطبيق مع أصدقائك</button>
+
     <button class="btn-outline" id="share-progress-wa" style="margin-bottom:12px;">📲 مشاركة إنجازي في Speakora على واتساب</button>
 
     <div class="card">
@@ -2798,6 +2800,19 @@ if (useCloud && fbAuth) {
     const el = document.getElementById('sp-vault-count');
     if (el) el.textContent = vault.length;
   }
+
+  window.spShareApp = async function() {
+    const URL_ = 'https://abdonateai92-star.github.io/speakora-/';
+    const TXT = 'جرّب Speakora، أكاديمية لتعلّم الإنجليزية حتى مستوى B2 بالتدريب اليومي والنطق والمفردات.';
+    const C = window.Capacitor, P = C && C.Plugins && C.Plugins.Share;
+    try {
+      if (P) { await P.share({ title: 'Speakora', text: TXT, url: URL_, dialogTitle: 'مشاركة التطبيق' }); return; }
+      if (navigator.share) { await navigator.share({ title: 'Speakora', text: TXT, url: URL_ }); return; }
+    } catch (e) { if (e && (e.name === 'AbortError' || /cancel/i.test(e.message || ''))) return; }
+    const t = TXT + '\n' + URL_;
+    try { await navigator.clipboard.writeText(t); toast('تم نسخ رابط التطبيق ✓'); }
+    catch (e) { prompt('انسخ الرابط وشاركه:', t); }
+  };
 
   window.spShareProgress = function() {
     const streak = initStreak();
